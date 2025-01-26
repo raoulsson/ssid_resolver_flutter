@@ -232,10 +232,10 @@ Future<void> _resolveSSID() async {
 The `SSIDManager` class is a helper class that encapsulates the plugin methods and provides a simple 
 way to get the SSID. It also provides a method to request the permission if needed.
 
-You can find the full source code of the `SSIDManager` class in the example app in 
+You can find the full source code of the `SimpleUsageExample` class here: 
 [main_simple_usage_example.dart](./example/lib/main_simple_usage_example.dart).
 
-Here is the source code of the `SSIDManager` class:
+Here is the source code of the `SSIDManager` class for reference (it's in the plugin lib folder here: [ssid_manager.dart](./lib/ssid_manager.dart)):
 
 ```dart
 import 'package:flutter/material.dart';
