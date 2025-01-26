@@ -233,7 +233,7 @@ The `SSIDManager` class is a helper class that encapsulates the plugin methods a
 way to get the SSID. It also provides a method to request the permission if needed.
 
 You can find the full source code of the `SSIDManager` class in the example app in 
-[main_simple_usage_example.dart](./example/lib/main_simple_usage_example.dart)!.
+[main_simple_usage_example.dart](./example/lib/main_simple_usage_example.dart).
 
 Here is the source code of the `SSIDManager` class:
 
