@@ -22,6 +22,7 @@ In the subfolder `example` you can find an example app that uses this plugin. Th
 
 Needs these permissions in the `Info.plist` file:
 
+```xml
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>This app needs access to location to determine the WiFi information.</string>
     <key>NSLocationUsageDescription</key>
@@ -30,6 +31,7 @@ Needs these permissions in the `Info.plist` file:
     <string>This app needs access to location to determine the WiFi information.</string>
     <key>com.apple.developer.networking.wifi-info</key>
     <true/>
+```
 
 And also the "Access WiFi Information". Eith open `<project_root>/ios/Runner/Runner.xcodeproj` in XCode 
 and go to "Signing & Capabilities". Add the "Access WiFi Information" capability.
@@ -56,18 +58,22 @@ This should produce the file `<project_root>/ios/Runner/Runner.entitlements` wit
 
 For Android, the `AndroidManifest.xml` file needs these permissions: 
 
+```xml
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+```
 
 And also the following queries:
 
+```xml
     <queries>
         <package android:name="com.google.android.gms" />
         <package android:name="com.android.settings" />
     </queries>
+```
 
 # Usage
 
