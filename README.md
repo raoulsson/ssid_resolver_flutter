@@ -8,10 +8,10 @@ and Android ([https://github.com/raoulsson/ssid-resolver-android](https://github
 
 | Android                                                                                                                                    | iOS                                                                                                                                    |
 |--------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| <img src="./res/ssid_resolver_flutter_android_1.jpeg" alt="Not all permissions granted" width="400"/><br />Not all permissions granted     | <img src="./res/ssid_resolver_flutter_ios_1.jpeg" alt="Not all permissions granted" width="400"/><br />Not all permissions granted       |
-| <img src="./res/ssid_resolver_flutter_android_2.jpeg" alt="OS dialog to grant permissions" width="400"/><br />OS dialog to grant permissions | <img src="./res/ssid_resolver_flutter_ios_2.jpeg" alt="OS dialog to grant permissions" width="400"/><br />OS dialog to grant permissions |
-| <img src="./res/ssid_resolver_flutter_android_3.jpeg" alt="All permissions granted" width="400"/><br />All permissions granted               | <img src="./res/ssid_resolver_flutter_ios_3.jpeg" alt="All permissions granted" width="400"/><br />All permissions granted               |
-| <img src="./res/ssid_resolver_flutter_android_4.jpeg" alt="Network SSID resolved" width="400"/><br />Network SSID resolved                   | <img src="./res/ssid_resolver_flutter_ios_4.jpeg" alt="Network SSID resolved" width="400"/><br />Network SSID resolved                   |
+| <img src="https://github.com/raoulsson/ssid-resolver-android/blob/master/res/ssid_resolver_flutter_android_1.jpeg" alt="Not all permissions granted" width="400"/><br />Not all permissions granted     | <img src="https://github.com/raoulsson/ssid-resolver-android/blob/master/res/ssid_resolver_flutter_ios_1.jpeg" alt="Not all permissions granted" width="400"/><br />Not all permissions granted       |
+| <img src="https://github.com/raoulsson/ssid-resolver-android/blob/master/res/ssid_resolver_flutter_android_2.jpeg" alt="OS dialog to grant permissions" width="400"/><br />OS dialog to grant permissions | <img src="https://github.com/raoulsson/ssid-resolver-android/blob/master/res/ssid_resolver_flutter_ios_2.jpeg" alt="OS dialog to grant permissions" width="400"/><br />OS dialog to grant permissions |
+| <img src="https://github.com/raoulsson/ssid-resolver-android/blob/master/res/ssid_resolver_flutter_android_3.jpeg" alt="All permissions granted" width="400"/><br />All permissions granted               | <img src="https://github.com/raoulsson/ssid-resolver-android/blob/master/res/ssid_resolver_flutter_ios_3.jpeg" alt="All permissions granted" width="400"/><br />All permissions granted               |
+| <img src="https://github.com/raoulsson/ssid-resolver-android/blob/master/res/ssid_resolver_flutter_android_4.jpeg" alt="Network SSID resolved" width="400"/><br />Network SSID resolved                   | <img src="https://github.com/raoulsson/ssid-resolver-android/blob/master/res/ssid_resolver_flutter_ios_4.jpeg" alt="Network SSID resolved" width="400"/><br />Network SSID resolved                   |
 
 
 # Usage and Configuration
@@ -40,7 +40,7 @@ in your project, add `ssid_resolver_flutter` as a [dependency in your pubspec.ya
   ssid_resolver_flutter: ^x.y.z
 ```
 
-In the folder [example/lib](./example/lib) you can find examples app that use this plugin, see below for a more detailed discussion. The important configuration parts for iOS and Android are listed below.
+In the folder [example/lib](https://github.com/raoulsson/ssid_resolver_flutter/tree/master/example/lib) you can find examples app that use this plugin, see below for a more detailed discussion. The important configuration parts for iOS and Android are listed below.
 
 ## iOS Permission Configuration
 
@@ -62,7 +62,7 @@ and go to "Signing & Capabilities". Add the "Access WiFi Information" capability
 
 | Add WiFi Capability 1                                                              | Add WiFi Capability 2                                                              |
 |------------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
-| <img src="./res/add-wifi-capability-1.png" alt="Add WiFi Capability 1" width="400"/> | <img src="./res/add-wifi-capability-2.png" alt="Add WiFi Capability 2" width="400"/> |      
+| <img src="https://github.com/raoulsson/ssid-resolver-android/blob/master/res/add-wifi-capability-1.png" alt="Add WiFi Capability 1" width="400"/> | <img src="https://github.com/raoulsson/ssid-resolver-android/blob/master/res/add-wifi-capability-2.png" alt="Add WiFi Capability 2" width="400"/> |      
 
 This should produce the file `<project_root>/ios/Runner/Runner.entitlements` with this content:
 
@@ -100,7 +100,7 @@ And also the following queries:
 
 # Examples
 
-The plugin is used in the example app in the [example/lib](./example/lib) folder. Use the [debug_app.dart](./example/lib/debug_app.dart)
+The plugin is used in the example app in the [example/lib](https://github.com/raoulsson/ssid_resolver_flutter/tree/master/example/lib) folder. Use the [debug_app.dart](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/lib/debug_app.dart)
 to fix your permissions issues. The example app demonstrates the usage of the plugin in a simple way, showing all the granted and missing permissions.
 Note that only the location permissions need user consent and the other ones have to be granted in the `AndroidManifest.xml` and `Info.plist` files, as 
 mentioned above.
@@ -138,7 +138,7 @@ the `onSSIDResolved` method. Here the complete code:
 ```
 
 This code will trigger the permission request dialog if needed and resolve the SSID in one step.
-The source code is here: [ssidresolver_mixin_example.dart](./example/lib/ssidresolver_mixin_example.dart).
+The source code is here: [ssidresolver_mixin_example.dart](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/lib/ssidresolver_mixin_example.dart).
 
 ## 2. Using SSIDHelper
 
@@ -174,7 +174,7 @@ do the actual resolving, which now should work on the first run, if granted:
     }
 ```
 
-These two steps are combined in the example app: [ssidhelper_example.dart](./example/lib/ssidhelper_example.dart).
+These two steps are combined in the example app: [ssidhelper_example.dart](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/lib/ssidhelper_example.dart).
 You will notice that the SSID only resolves after you click the button for the second time.
 
 
@@ -184,7 +184,7 @@ This example shows how to use the plugin "hands-on". To get the permissions, the
 modal dialog and the later returns to the app. If you need full control over the process, you therefore need
 to use the `WidgetsBindingObserver`, register your class as an observer and implement the `didChangeAppLifecycleState` method.
 Have a look at the "Do It Yourself" implementation that can be found in  the example app folder 
-here: [do_it_yourself_example.dart](./example/lib/do_it_yourself_example.dart).
+here: [do_it_yourself_example.dart](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/lib/do_it_yourself_example.dart).
 
 Below is part of the source code. In the case permissions are not yet granted, the OS will 
 take over and show the permission dialog. Thus, when the app is resumed, the observer will check 
@@ -292,7 +292,7 @@ If you run into permissions issues, make sure to check the permissions in the `A
 and `Info.plist` files as described above and try running the app on a real device instead of the emulator. 
 iOS will not give you a SSID on the simulator. 
 
-Also run the example app: [debug_app.dart](./example/lib/main_full_debug_app.dart) and check the output. 
+Also run the example app: [debug_app.dart](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/lib/debug_app.dart) and check the output. 
 That should show which permissions are missing.
 
 I hope this helps.
