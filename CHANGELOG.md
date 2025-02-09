@@ -16,3 +16,7 @@
 ## 1.0.3
 
 * Fixed urls in README.md
+
+## 1.0.4
+
+* Fixed urls in README.md
