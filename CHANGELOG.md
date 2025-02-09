@@ -24,3 +24,7 @@
 ## 1.0.5
 
 * Fixed format of README.md
+
+## 1.0.6
+
+* Fixed format of LICENSE file
