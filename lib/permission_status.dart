@@ -20,7 +20,8 @@ class PermissionStatus {
     );
   }
 
-  bool get isGranted => status == 'All permissions granted' || status == 'Permissions granted';
+  bool get isGranted =>
+      status == 'All permissions granted' || status == 'Permissions granted';
   bool get isDenied => !isGranted;
   bool get hasError => status == 'Error';
 

@@ -95,7 +95,8 @@ class _MyClientTwoState extends State<MyClientTwo> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFFA500),
                       foregroundColor: Colors.black,
-                      textStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      textStyle: const TextStyle(
+                          fontSize: 24, fontWeight: FontWeight.bold),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                     child: const Text('Resolve SSID'),

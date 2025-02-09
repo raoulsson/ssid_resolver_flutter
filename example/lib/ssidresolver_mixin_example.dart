@@ -13,7 +13,8 @@ class MyClientOne extends StatefulWidget {
   State<MyClientOne> createState() => _MyClientOneState();
 }
 
-class _MyClientOneState extends State<MyClientOne> with SSIDResolverMixin<MyClientOne> {
+class _MyClientOneState extends State<MyClientOne>
+    with SSIDResolverMixin<MyClientOne> {
   String _ssid = '';
 
   @override

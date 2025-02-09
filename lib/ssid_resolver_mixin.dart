@@ -30,7 +30,8 @@ class _MyClientState extends State<MyClient> with SSIDResolverMixin<MyClient> {
 }
 */
 
-mixin SSIDResolverMixin<T extends StatefulWidget> on State<T> implements WidgetsBindingObserver {
+mixin SSIDResolverMixin<T extends StatefulWidget> on State<T>
+    implements WidgetsBindingObserver {
   static const String unknownSSID = "Unknown";
   final _ssidResolver = SSIDResolver();
   bool _isRequestingPermission = false;
@@ -92,7 +93,7 @@ mixin SSIDResolverMixin<T extends StatefulWidget> on State<T> implements Widgets
 
     _permissionCheckTimer = Timer.periodic(
       const Duration(milliseconds: 100),
-          (_) => _checkPermissionAndContinue(),
+      (_) => _checkPermissionAndContinue(),
     );
   }
 
@@ -122,11 +123,12 @@ mixin SSIDResolverMixin<T extends StatefulWidget> on State<T> implements Widgets
   Future<bool> didPushRoute(String route) async => false;
 
   @override
-  Future<bool> didPushRouteInformation(RouteInformation routeInformation) async => false;
+  Future<bool> didPushRouteInformation(
+          RouteInformation routeInformation) async =>
+      false;
 
   @override
-  void didChangeViewFocus(ViewFocusEvent event) {
-  }
+  void didChangeViewFocus(ViewFocusEvent event) {}
 
   @override
   Future<AppExitResponse> didRequestAppExit() {
@@ -134,12 +136,10 @@ mixin SSIDResolverMixin<T extends StatefulWidget> on State<T> implements Widgets
   }
 
   @override
-  void handleCancelBackGesture() {
-  }
+  void handleCancelBackGesture() {}
 
   @override
-  void handleCommitBackGesture() {
-  }
+  void handleCommitBackGesture() {}
 
   @override
   bool handleStartBackGesture(PredictiveBackEvent backEvent) {
@@ -148,5 +148,4 @@ mixin SSIDResolverMixin<T extends StatefulWidget> on State<T> implements Widgets
 
   @override
   void handleUpdateBackGestureProgress(PredictiveBackEvent backEvent) {}
-
 }

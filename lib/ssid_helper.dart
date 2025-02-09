@@ -53,4 +53,3 @@ class SSIDHelper with WidgetsBindingObserver {
     }
   }
 }
-

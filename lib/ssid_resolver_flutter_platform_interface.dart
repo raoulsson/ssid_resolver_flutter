@@ -7,7 +7,8 @@ abstract class SsidResolverFlutterPlatform extends PlatformInterface {
 
   static final Object _token = Object();
 
-  static SsidResolverFlutterPlatform _instance = MethodChannelSsidResolverFlutter();
+  static SsidResolverFlutterPlatform _instance =
+      MethodChannelSsidResolverFlutter();
 
   /// The default instance of [SsidResolverFlutterPlatform] to use.
   static SsidResolverFlutterPlatform get instance => _instance;
@@ -25,7 +26,8 @@ abstract class SsidResolverFlutterPlatform extends PlatformInterface {
   }
 
   Future<Map<String, dynamic>> checkPermissionStatus() {
-    throw UnimplementedError('checkPermissionStatus() has not been implemented.');
+    throw UnimplementedError(
+        'checkPermissionStatus() has not been implemented.');
   }
 
   Future<Map<String, dynamic>> requestPermission() {

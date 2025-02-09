@@ -19,7 +19,8 @@ class MyClientThree extends StatefulWidget {
   State<MyClientThree> createState() => _MyClientThreeState();
 }
 
-class _MyClientThreeState extends State<MyClientThree> with WidgetsBindingObserver {
+class _MyClientThreeState extends State<MyClientThree>
+    with WidgetsBindingObserver {
   final _ssidResolver = SSIDResolver();
   String _ssid = '';
   bool _isRequestingPermission = false;
@@ -80,7 +81,7 @@ class _MyClientThreeState extends State<MyClientThree> with WidgetsBindingObserv
     // Set up periodic checks in case the app didn't lose focus
     _permissionCheckTimer = Timer.periodic(
       const Duration(milliseconds: 100),
-          (_) => _checkPermissionAndContinue(),
+      (_) => _checkPermissionAndContinue(),
     );
   }
 
@@ -136,7 +137,8 @@ class _MyClientThreeState extends State<MyClientThree> with WidgetsBindingObserv
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFFA500),
                       foregroundColor: Colors.black,
-                      textStyle: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      textStyle: const TextStyle(
+                          fontSize: 24, fontWeight: FontWeight.bold),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                     child: const Text('Resolve SSID'),

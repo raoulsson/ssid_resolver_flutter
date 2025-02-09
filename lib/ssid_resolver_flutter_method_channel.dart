@@ -11,19 +11,22 @@ class MethodChannelSsidResolverFlutter extends SsidResolverFlutterPlatform {
 
   @override
   Future<String?> getPlatformVersion() async {
-    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
+    final version =
+        await methodChannel.invokeMethod<String>('getPlatformVersion');
     return version;
   }
 
   @override
   Future<Map<String, dynamic>> checkPermissionStatus() async {
-    final result = await methodChannel.invokeMethod<Map<Object?, Object?>>('checkPermissionStatus');
+    final result = await methodChannel
+        .invokeMethod<Map<Object?, Object?>>('checkPermissionStatus');
     return _convertToStringDynamicMap(result!);
   }
 
   @override
   Future<Map<String, dynamic>> requestPermission() async {
-    final result = await methodChannel.invokeMethod<Map<Object?, Object?>>('requestPermission');
+    final result = await methodChannel
+        .invokeMethod<Map<Object?, Object?>>('requestPermission');
     return _convertToStringDynamicMap(result!);
   }
 
@@ -37,7 +40,8 @@ class MethodChannelSsidResolverFlutter extends SsidResolverFlutterPlatform {
   Map<String, dynamic> _convertToStringDynamicMap(Map<Object?, Object?> map) {
     return map.map((key, value) {
       if (value is List) {
-        return MapEntry(key.toString(), List<String>.from(value.map((e) => e.toString())));
+        return MapEntry(
+            key.toString(), List<String>.from(value.map((e) => e.toString())));
       }
       return MapEntry(key.toString(), value);
     });

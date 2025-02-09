@@ -13,7 +13,8 @@ class SSIDResolver {
 
   Future<PermissionStatus> checkPermissionStatus() async {
     try {
-      final result = await _channel.invokeMethod<Map<Object?, Object?>>('checkPermissionStatus');
+      final result = await _channel
+          .invokeMethod<Map<Object?, Object?>>('checkPermissionStatus');
       return PermissionStatus.fromMap(Map<String, dynamic>.from(result!));
     } on PlatformException catch (e) {
       return PermissionStatus(
@@ -27,7 +28,8 @@ class SSIDResolver {
 
   Future<PermissionStatus> requestPermission() async {
     try {
-      final result = await _channel.invokeMethod<Map<Object?, Object?>>('requestPermission');
+      final result = await _channel
+          .invokeMethod<Map<Object?, Object?>>('requestPermission');
       return PermissionStatus.fromMap(Map<String, dynamic>.from(result!));
     } on PlatformException catch (e) {
       return PermissionStatus(
