@@ -12,3 +12,7 @@
 ## 1.0.2
 
 * Added absolute image and source file urls to README.md
+
+## 1.0.3
+
+* Fixed urls in README.md
