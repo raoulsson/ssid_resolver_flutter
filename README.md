@@ -6,8 +6,8 @@ For iOS and Android. This implementation uses the latest Android and iOS APIs as
 This plugin is based on my two standalone implementations for iOS ([https://github.com/raoulsson/ssid-resolver-ios](https://github.com/raoulsson/ssid-resolver-ios))
 and Android ([https://github.com/raoulsson/ssid-resolver-android](https://github.com/raoulsson/ssid-resolver-android)).
 
-| Android                                                                                                                                                                                                   | iOS                                                                                                                                    |
-|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+| Android                                                                                                                                                                                                              | iOS                                                                                                                                                                                                              |
+|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res//ssid_resolver_flutter_android_1.jpeg" alt="Not all permissions granted" width="400"/><br />Not all permissions granted       | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res//ssid_resolver_flutter_ios_1.jpeg" alt="Not all permissions granted" width="400"/><br />Not all permissions granted       |
 | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res//ssid_resolver_flutter_android_2.jpeg" alt="OS dialog to grant permissions" width="400"/><br />OS dialog to grant permissions | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res//ssid_resolver_flutter_ios_2.jpeg" alt="OS dialog to grant permissions" width="400"/><br />OS dialog to grant permissions |
 | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res//ssid_resolver_flutter_android_3.jpeg" alt="All permissions granted" width="400"/><br />All permissions granted               | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res//ssid_resolver_flutter_ios_3.jpeg" alt="All permissions granted" width="400"/><br />All permissions granted               |
@@ -34,13 +34,15 @@ Note: On iOS, WiFi access requires location permissions, even with XCode WiFi ca
 # Usage
 
 The plugin is available on [pub.dev](https://pub.dev/packages/ssid_resolver_flutter). To use the plugin 
-in your project, add `ssid_resolver_flutter` as a [dependency in your pubspec.yaml file](https://flutter.dev/docs/development/packages-and-plugins/using-packages):
+in your project, add `ssid_resolver_flutter` as a dependency in your pubspec.yaml file:
 
 ```yaml
   ssid_resolver_flutter: ^x.y.z
 ```
 
-In the folder [example/lib](https://github.com/raoulsson/ssid_resolver_flutter/tree/master/example/lib) you can find examples app that use this plugin, see below for a more detailed discussion. The important configuration parts for iOS and Android are listed below.
+In the folder [example/lib](https://github.com/raoulsson/ssid_resolver_flutter/tree/master/example/lib) you can 
+find examples app that use this plugin, see below for a more detailed discussion. The important configuration 
+parts for iOS and Android are listed below.
 
 ## iOS Permission Configuration
 
@@ -60,8 +62,8 @@ Needs these permissions in the `Info.plist` file:
 And also the "Access WiFi Information". Either open `<project_root>/ios/Runner/Runner.xcodeproj` in XCode 
 and go to "Signing & Capabilities". Add the "Access WiFi Information" capability.
 
-| Add WiFi Capability 1                                                              | Add WiFi Capability 2                                                              |
-|------------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
+| Add WiFi Capability 1                                                                                                                                        | Add WiFi Capability 2                                                                                                                                        |
+|--------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res//add-wifi-capability-1.png" alt="Add WiFi Capability 1" width="400"/> | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res//add-wifi-capability-2.png" alt="Add WiFi Capability 2" width="400"/> |      
 
 This should produce the file `<project_root>/ios/Runner/Runner.entitlements` with this content:
@@ -100,15 +102,18 @@ And also the following queries:
 
 # Examples
 
-The plugin is used in the example app in the [example/lib](https://github.com/raoulsson/ssid_resolver_flutter/tree/master/example/lib) folder. Use the [debug_app.dart](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/lib/debug_app.dart)
-to fix your permissions issues. The example app demonstrates the usage of the plugin in a simple way, showing all the granted and missing permissions.
+The plugin is used in the example app in the [example/lib](https://github.com/raoulsson/ssid_resolver_flutter/tree/master/example/lib) folder. 
+Use the [debug_app.dart](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/lib/debug_app.dart)
+to fix your permissions issues. The example app demonstrates the usage of the plugin in a simple way, 
+showing all the granted and missing permissions. 
+
 Note that only the location permissions need user consent and the other ones have to be granted in the `AndroidManifest.xml` and `Info.plist` files, as 
 mentioned above.
 
 ## 1. Using SSIDResolver Mixin
 
-The easiest and fastest way to use the plugin is by applying the mixin: `SSIDResolverMixin`. This will handle the 
-permission requests and SSID resolution for you. Simply add the mixin to your view and implement 
+The easiest and fastest way to use the plugin is by applying the mixin: `SSIDResolverMixin`. This will 
+handle the permission requests and SSID resolution for you. Simply add the mixin to your view and implement 
 the `onSSIDResolved` method. Here the complete code: 
 
 ```dart

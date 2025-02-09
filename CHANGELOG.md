@@ -20,3 +20,7 @@
 ## 1.0.4
 
 * Fixed urls in README.md
+
+## 1.0.5
+
+* Fixed format of README.md

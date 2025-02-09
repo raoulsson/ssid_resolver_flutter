@@ -1,6 +1,6 @@
 name: ssid_resolver_flutter
 description: "A flutter plugin to resolve the SSID of the connected WiFi network, or simply: 'Get my Wifi Name'"
-version: 1.0.4
+version: 1.0.5
 homepage: https://github.com/raoulsson/ssid_resolver_flutter
 
 environment:
