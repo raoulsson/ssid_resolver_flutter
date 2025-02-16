@@ -1,3 +1,7 @@
+## 1.0.9
+
+* Fixed Typo in README
+
 ## 1.0.8
 
 * Updated README
