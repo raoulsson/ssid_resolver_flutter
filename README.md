@@ -3,8 +3,9 @@
 A flutter plugin to resolve the SSID of the connected WiFi network, or simply: "Get my Wifi Name". 
 For iOS and Android. This implementation uses the latest Android and iOS APIs as of January 2025.
 
-This plugin is based on my two standalone implementations for iOS ([https://github.com/raoulsson/ssid-resolver-ios](https://github.com/raoulsson/ssid-resolver-ios))
-and Android ([https://github.com/raoulsson/ssid-resolver-android](https://github.com/raoulsson/ssid-resolver-android)).
+Below you see screenshots from the example app: [debug_app.dart](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/lib/debug_app.dart).
+On the left side you see the Android app and on the right side the iOS app. It's also recommended 
+to run the example app to see if the permissions are set up correctly.
 
 | Android                                                                                                                                                                                                              | iOS                                                                                                                                                                                                              |
 |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -13,6 +14,8 @@ and Android ([https://github.com/raoulsson/ssid-resolver-android](https://github
 | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res//ssid_resolver_flutter_android_3.jpeg" alt="All permissions granted" width="400"/><br />All permissions granted               | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res//ssid_resolver_flutter_ios_3.jpeg" alt="All permissions granted" width="400"/><br />All permissions granted               |
 | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res//ssid_resolver_flutter_android_4.jpeg" alt="Network SSID resolved" width="400"/><br />Network SSID resolved                   | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res//ssid_resolver_flutter_ios_4.jpeg" alt="Network SSID resolved" width="400"/><br />Network SSID resolved                   |
 
+This plugin is based on my two standalone implementations for [iOS](https://github.com/raoulsson/ssid-resolver-ios)
+and Android [Android](https://github.com/raoulsson/ssid-resolver-android)), both available on GitHub.
 
 # Usage and Configuration
 
@@ -49,14 +52,14 @@ parts for iOS and Android are listed below.
 Needs these permissions in the `Info.plist` file:
 
 ```xml
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>This app needs access to location to determine the WiFi information.</string>
-    <key>NSLocationUsageDescription</key>
-    <string>This app needs access to location to determine the WiFi information.</string>
-    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-    <string>This app needs access to location to determine the WiFi information.</string>
-    <key>com.apple.developer.networking.wifi-info</key>
-    <true/>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>This app needs access to location to determine the WiFi information.</string>
+<key>NSLocationUsageDescription</key>
+<string>This app needs access to location to determine the WiFi information.</string>
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>This app needs access to location to determine the WiFi information.</string>
+<key>com.apple.developer.networking.wifi-info</key>
+<true/>
 ```
 
 And also the "Access WiFi Information". Either open `<project_root>/ios/Runner/Runner.xcodeproj` in XCode 

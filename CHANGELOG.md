@@ -1,3 +1,7 @@
+## 1.0.8
+
+* Updated README
+
 ## 1.0.7
 
 * Fixed format of CHANGELOG.md
