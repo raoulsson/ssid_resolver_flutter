@@ -15,7 +15,7 @@ to run the example app to see if the permissions are set up correctly.
 | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res//ssid_resolver_flutter_android_4.jpeg" alt="Network SSID resolved" width="400"/><br />Network SSID resolved                   | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res//ssid_resolver_flutter_ios_4.jpeg" alt="Network SSID resolved" width="400"/><br />Network SSID resolved                   |
 
 This plugin is based on my two standalone implementations for [iOS](https://github.com/raoulsson/ssid-resolver-ios)
-and Android [Android](https://github.com/raoulsson/ssid-resolver-android), both available on GitHub.
+and [Android](https://github.com/raoulsson/ssid-resolver-android), both available on GitHub.
 
 # Usage and Configuration
 
