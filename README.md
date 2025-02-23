@@ -1,11 +1,27 @@
 # ssid_resolver_flutter - "Get my Wifi Name"
 
-A flutter plugin to resolve the SSID of the connected WiFi network, or simply: "Get my Wifi Name". 
-For iOS and Android. This implementation uses the latest Android and iOS APIs as of January 2025.
+A flutter plugin to resolve the SSID of the connected wireless LAN, or simply: "Get my Wi-Fi Name".  
 
-Below you see screenshots from the example app: [debug_app.dart](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/lib/debug_app.dart).
-On the left side you see the Android app and on the right side the iOS app. It's also recommended 
-to run the example app to see if the permissions are set up correctly.
+**TLDR: Add the mixin class `SSIDResolverMixin` to your view and implement the `onSSIDResolved` method.**
+
+This will trigger the permission request dialog if needed and resolve the SSID in one step. 
+See below: [Using SSIDResolver Mixin](#1-using-ssidresolver-mixin).
+
+---
+
+Over the years, the number of permissions required to access the wireless network name has increased 
+in both the iOS and Android Operating System and this implementation was tested successfully on both 
+systems in early 2025. I couldn't get existing plugins to work or maybe failed to use them properly, 
+so I created this one.
+
+To resolve the name, the SSID of the Wi-Fi, your phone is connected to, you have to get a bunch of 
+permission settings right that have to be statically set in your code for this plugin to work. Next 
+you need the users consent to give you "Location Permissions".
+
+The contained example app: [debug_app.dart](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/lib/debug_app.dart) 
+is a perfect starting point, to figure out any permission issues you might have. It will show you exactly what you are missing.
+
+Below you can see the example app in action. On the left side you see the Android app and on the right side the iOS app.
 
 | Android                                                                                                                                                                                                              | iOS                                                                                                                                                                                                              |
 |----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -105,19 +121,27 @@ And also the following queries:
 
 # Examples
 
-The plugin is used in the example app in the [example/lib](https://github.com/raoulsson/ssid_resolver_flutter/tree/master/example/lib) folder. 
+All examples are available in the [example/lib](https://github.com/raoulsson/ssid_resolver_flutter/tree/master/example/lib) folder. 
 Use the [debug_app.dart](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/lib/debug_app.dart)
 to fix your permissions issues. The example app demonstrates the usage of the plugin in a simple way, 
 showing all the granted and missing permissions. 
 
-Note that only the location permissions need user consent and the other ones have to be granted in the `AndroidManifest.xml` and `Info.plist` files, as 
-mentioned above.
+Note that only the location permissions need user consent and the other ones have to be granted in the 
+`AndroidManifest.xml` for Android, and `Info.plist` and `Runner.entitlements` files in the case of iOS, 
+as mentioned above. It's important to note, that the permissions are given by the client code of this 
+plugin, not the plugin itself. 
+
+Just follow the examples and the permission files of the "example app", 
+[here for Android](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/android/app/src/main/AndroidManifest.xml)
+and [here](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/ios/Runner/Info.plist) 
+and [here for iOS](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/ios/Runner/Runner.entitlements).
 
 ## 1. Using SSIDResolver Mixin
 
-The easiest and fastest way to use the plugin is by applying the mixin: `SSIDResolverMixin`. This will 
-handle the permission requests and SSID resolution for you. Simply add the mixin to your view and implement 
-the `onSSIDResolved` method. Here the complete code: 
+Add the mixin class `SSIDResolverMixin` to your view and implement the `onSSIDResolved` method.
+This will trigger the permission request dialog if needed and resolve the SSID in one step.
+
+Here is the full client code that takes full advantage of the plugin for Wi-Fi SSID resolution:
 
 ```dart
     class MyClientOne extends StatefulWidget {
@@ -145,16 +169,27 @@ the `onSSIDResolved` method. Here the complete code:
     }
 ```
 
-This code will trigger the permission request dialog if needed and resolve the SSID in one step.
 The source code is here: [ssidresolver_mixin_example.dart](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/lib/ssidresolver_mixin_example.dart).
+If you need more fine-grained control, on when the SSID is resolved or when the permission dialog should 
+be shown, look below at the "Do It Yourself" example.
 
 ## 2. Using SSIDHelper
 
-Usually the location permission is given once, after the app is downloaded and started for the first time. 
-Therefore, if you have multiple screens, before you need the SSID, you can request the permission on app 
-startup and then simply resolve the SSID later on in the code. 
+Once the user gives the "location permission", the SSID can be resolved. And because the "location 
+permission" step only has to happen once in your apps lifetime, why bother and make things complicated?
+If there are other screens that appear in your app before you trigger the SSID resolution, you can 
+use the `SSIDHelper` class to do the initialization and permission request way before you actually 
+need the SSID.
 
-On a flutter screen that is shown after startup, do the initialization in the `initState` method:
+This greatly simplifies the flow of your app, as you don't need to handle the "re-entry" event, after 
+the phone operating system is handing you back the control and the result of the permission dialog.
+
+Use the `SSIDHelper` class to do the initialization and permission request (or do the same that it 
+does internally) after your app starts up. The call to `_ssidManager.initialize()` will trigger the 
+permission request dialog if needed.
+
+On subsequent screens, you can then call `getSSID()` to get the SSID without having to worry about 
+the permission dialog.
 
 ```dart
     final ssidHelper = SSIDHelper();
@@ -164,27 +199,21 @@ On a flutter screen that is shown after startup, do the initialization in the `i
       super.initState();
       _ssidManager.initialize();
     }
-    
-    @override
-    void dispose() {
-      _ssidManager.dispose();
-      super.dispose();
-    }
 ```
 
-This will trigger the permission request dialog if needed. After that, on a follow up screen, you can 
-do the actual resolving, which now should work on the first run, if granted:
+Don't forget to call `_ssidManager.dispose();` in your `dispose` method.
+
+Now, on the screen where you need the SSID, you can simply call `_ssidManager.getSSID()`:
 
 ```dart
     Future<void> _resolveSSID() async {
-      final ssid = await ssidHelper.getSSID();
+      final ssid = await _ssidManager.getSSID();
       setState(() => _ssid = ssid);
     }
 ```
 
 These two steps are combined in the example app: [ssidhelper_example.dart](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/lib/ssidhelper_example.dart).
 You will notice that the SSID only resolves after you click the button for the second time.
-
 
 ## 3. "Do It Yourself"
 
@@ -291,8 +320,6 @@ class _MyClientThreeState extends State<MyClientThree> with WidgetsBindingObserv
   }
 }
 ```
-
-If you need to know the SSID on load, you can call `_getSSID()` in the `initState` method.
 
 # Troubleshooting
 

@@ -1,3 +1,7 @@
+## 1.0.11
+
+* Improved discussion and depth of app documentation in README.md
+
 ## 1.0.10
 
 * Fixed another Typo in README
