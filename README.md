@@ -140,6 +140,18 @@ and [here for iOS](https://github.com/raoulsson/ssid_resolver_flutter/blob/maste
 ## 1. Using SSIDResolver Mixin
 
 Add the mixin class `SSIDResolverMixin` to your view and implement the `onSSIDResolved` method.
+
+```dart
+  class _MyClientOneState extends State<MyClientOne> with SSIDResolverMixin<MyClientOne> {
+        ...
+        @override
+        void onSSIDChanged(String ssid) {
+          ...
+        }
+        ...
+  }
+```
+
 This will trigger the permission request dialog if needed and resolve the SSID in one step.
 
 Here is the full client code that takes full advantage of the plugin for Wi-Fi SSID resolution:
