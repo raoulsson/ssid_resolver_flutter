@@ -2,8 +2,8 @@
 
 A flutter plugin to resolve the SSID of the connected wireless LAN, or simply: "Get my Wi-Fi Name".  
 
-[!TIP]
-TLDR: Add the mixin class `SSIDResolverMixin` to your view and implement the `onSSIDResolved` method.
+> [!TIP]
+> **TLDR**: Add the mixin class `SSIDResolverMixin` to your view and implement the `onSSIDResolved` method.
 
 This will trigger the permission request dialog if needed and resolve the SSID in one step. 
 See below: [Using SSIDResolver Mixin](#1-using-ssidresolver-mixin).
