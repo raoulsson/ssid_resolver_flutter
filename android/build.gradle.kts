@@ -47,9 +47,9 @@ android {
 dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1")
-    compileOnly("io.flutter:flutter_embedding_debug:1.0.0-dbec018f4d83ae4b7b97eb8c5a066c61832e12df")
-    compileOnly("io.flutter:flutter_embedding_release:1.0.0-dbec018f4d83ae4b7b97eb8c5a066c61832e12df")
-    testImplementation("io.flutter:flutter_embedding_debug:1.0.0-dbec018f4d83ae4b7b97eb8c5a066c61832e12df")
+    compileOnly("io.flutter:flutter_embedding_debug:1.0.0")
+    compileOnly("io.flutter:flutter_embedding_release:1.0.0")
+    testImplementation("io.flutter:flutter_embedding_debug:1.0.0")
     testImplementation("org.jetbrains.kotlin:kotlin-test:2.1.0")
     testImplementation("org.mockito:mockito-core:5.15.2")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
