@@ -1,3 +1,7 @@
+## 1.1.1
+
+* Fixed gradle scripts on plugin level
+
 ## 1.0.12
 
 * Removed android dependency "io.flutter:flutter_embedding_debug:1.0.0-dbec018f4d83ae4b7b97eb8c5a066c61832e12df"
