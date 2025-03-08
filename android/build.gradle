@@ -67,17 +67,12 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    // Add lint configuration to suppress errors
     lintOptions {
         abortOnError = false
-        // Uncomment below to create a baseline file
-        // baseline = file("lint-baseline.xml")
     }
 
     dependencies {
-        // Add the Flutter embedding dependencies for both main and test
         compileOnly files("$flutterSdkPath/bin/cache/artifacts/engine/android-arm64/flutter.jar")
-        // This makes the Flutter dependencies available to tests
         testImplementation files("$flutterSdkPath/bin/cache/artifacts/engine/android-arm64/flutter.jar")
 
         implementation "androidx.core:core-ktx:1.12.0"

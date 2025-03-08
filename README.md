@@ -36,6 +36,8 @@ and [Android](https://github.com/raoulsson/ssid-resolver-android), both availabl
 
 # Usage and Configuration
 
+Note: When no SSID is found, the String "Unknown" is returned (also always the case on iOS simulator).
+
 ## SSID Resolution Flow
 
 The SSID resolver provides three key methods:
