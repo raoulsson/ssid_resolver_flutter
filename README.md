@@ -11,8 +11,8 @@ See below: [Using SSIDResolver Mixin](#1-using-ssidresolver-mixin).
 ---
 
 > [!IMPORTANT]
-> **Note that as of version 1.2.1, installation issues for Android projects have been resolved! (`flutter pub get` and `./gradlew build`)**: Add the mixin class `SSIDResolverMixin` to your view and implement the `onSSIDResolved` method.
-> 
+> **Note that as of version 1.2.1, installation issues for Android projects have been resolved! (`flutter pub get` and `./gradlew build`)**
+
 ---
 
 Over the years, the number of permissions required to access the wireless network name has increased 

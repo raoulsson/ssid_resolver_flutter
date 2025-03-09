@@ -1,4 +1,9 @@
-## 1.2.0
+## 1.2.2
+
+* Fixed typo in README.md
+
+
+## 1.2.1
 
 * Issues with dependencies for the Android part should be resolved now. Could not test for all cases though.
 
