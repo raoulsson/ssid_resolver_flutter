@@ -1,3 +1,7 @@
+## 1.2.0
+
+* Issues with dependencies for the Android part should be resolved now. Could not test for all cases though.
+
 ## 1.1.1
 
 * Fixed gradle scripts on plugin level

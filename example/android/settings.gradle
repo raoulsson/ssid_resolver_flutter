@@ -1,3 +1,0 @@
-// example/android/settings.gradle
-rootProject.name = 'example'
-include ':app'
