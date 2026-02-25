@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:ui';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:ssid_resolver_flutter/ssid_resolver_flutter.dart';
 
 // Mixin for usage in client code. This code will on load ask for user permissions and update the ssid if permissions are granted.
@@ -30,32 +28,32 @@ class _MyClientState extends State<MyClient> with SSIDResolverMixin<MyClient> {
 }
 */
 
-mixin SSIDResolverMixin<T extends StatefulWidget> on State<T>
-    implements WidgetsBindingObserver {
+mixin SSIDResolverMixin<T extends StatefulWidget> on State<T> {
   static const String unknownSSID = "Unknown";
   final _ssidResolver = SSIDResolver();
   bool _isRequestingPermission = false;
   Timer? _permissionCheckTimer;
+  late final _SSIDResolverLifecycleObserver _lifecycleObserver;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    _lifecycleObserver = _SSIDResolverLifecycleObserver(
+      onResumed: () {
+        if (_isRequestingPermission) {
+          _checkPermissionAndContinue();
+        }
+      },
+    );
+    WidgetsBinding.instance.addObserver(_lifecycleObserver);
     getSSID();
   }
 
   @override
   void dispose() {
     _permissionCheckTimer?.cancel();
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(_lifecycleObserver);
     super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && _isRequestingPermission) {
-      _checkPermissionAndContinue();
-    }
   }
 
   void onSSIDChanged(String ssid);
@@ -96,56 +94,17 @@ mixin SSIDResolverMixin<T extends StatefulWidget> on State<T>
       (_) => _checkPermissionAndContinue(),
     );
   }
+}
 
-  // WidgetsBindingObserver implementations
-  @override
-  void didChangeAccessibilityFeatures() {}
+class _SSIDResolverLifecycleObserver with WidgetsBindingObserver {
+  final VoidCallback onResumed;
 
-  @override
-  void didChangeLocales(List<Locale>? locales) {}
-
-  @override
-  void didChangeMetrics() {}
+  _SSIDResolverLifecycleObserver({required this.onResumed});
 
   @override
-  void didChangePlatformBrightness() {}
-
-  @override
-  void didChangeTextScaleFactor() {}
-
-  @override
-  void didHaveMemoryPressure() {}
-
-  @override
-  Future<bool> didPopRoute() async => false;
-
-  @override
-  Future<bool> didPushRoute(String route) async => false;
-
-  @override
-  Future<bool> didPushRouteInformation(
-          RouteInformation routeInformation) async =>
-      false;
-
-  @override
-  void didChangeViewFocus(ViewFocusEvent event) {}
-
-  @override
-  Future<AppExitResponse> didRequestAppExit() {
-    throw UnimplementedError();
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      onResumed();
+    }
   }
-
-  @override
-  void handleCancelBackGesture() {}
-
-  @override
-  void handleCommitBackGesture() {}
-
-  @override
-  bool handleStartBackGesture(PredictiveBackEvent backEvent) {
-    throw UnimplementedError();
-  }
-
-  @override
-  void handleUpdateBackGestureProgress(PredictiveBackEvent backEvent) {}
 }
