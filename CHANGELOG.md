@@ -1,3 +1,9 @@
+## 1.3.0
+
+* Fixed Android SSID resolution timeout on modern Android (API 29+). Replaced deprecated `WifiManager.startScan()` with synchronous `NetworkCapabilities.transportInfo` lookup, fixing 5-second timeouts on Android 16 (API 36) and other recent versions.
+* Fixed `SSIDResolverMixin` compatibility with newer Flutter versions. Replaced fragile `implements WidgetsBindingObserver` with an internal observer class, fixing missing override errors (e.g. `handleStatusBarTap`).
+* Upgraded `flutter_lints` from v5 to v6.
+
 ## 1.2.2
 
 * Fixed typo in README.md

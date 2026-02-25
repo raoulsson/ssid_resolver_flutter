@@ -11,7 +11,7 @@ See below: [Using SSIDResolver Mixin](#1-using-ssidresolver-mixin).
 ---
 
 > [!IMPORTANT]
-> **Note that as of version 1.2.1, installation issues for Android projects have been resolved! (`flutter pub get` and `./gradlew build`)**
+> **Version 1.3.0**: Fixed Android SSID resolution timeout on modern Android (API 29+) and fixed compatibility with newer Flutter versions.
 
 ---
 
@@ -38,6 +38,15 @@ Below you can see the example app in action. On the left side you see the Androi
 
 This plugin is based on my two standalone implementations for [iOS](https://github.com/raoulsson/ssid-resolver-ios)
 and [Android](https://github.com/raoulsson/ssid-resolver-android), both available on GitHub.
+
+## Android SSID Resolution
+
+On Android, the plugin resolves the SSID using a three-tier approach:
+1. **`NetworkCapabilities.transportInfo`** (API 29+) — synchronous, instant result
+2. **`WifiManager.connectionInfo`** — fallback for older devices
+3. **Async `registerNetworkCallback`** — last resort with 5-second timeout
+
+The plugin does **not** use `WifiManager.startScan()`, which is deprecated and throttled/broken on modern Android.
 
 # Usage and Configuration
 

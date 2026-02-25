@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-`ssid_resolver_flutter` is a Flutter plugin (v1.2.2) that resolves the connected WiFi SSID on iOS and Android with full permission handling. Published at https://github.com/raoulsson/ssid_resolver_flutter.
+`ssid_resolver_flutter` is a Flutter plugin (v1.3.0) that resolves the connected WiFi SSID on iOS and Android with full permission handling. Published at https://github.com/raoulsson/ssid_resolver_flutter.
 
 ## Common Commands
 
@@ -68,14 +68,14 @@ Four methods cross the platform boundary:
 ### Android Native (`android/src/main/kotlin/.../`)
 
 - **`SsidResolverFlutterPlugin.kt`** — Plugin entry point; implements `FlutterPlugin`, `ActivityAware`, `RequestPermissionsResultListener`; uses Kotlin coroutines for async
-- **`CoreSSIDResolver.kt`** — Uses `ConnectivityManager`/`WifiManager` with coroutines (`suspendCancellableCoroutine`, `withTimeout` at 5s)
+- **`CoreSSIDResolver.kt`** — Three-tier SSID resolution: (1) `NetworkCapabilities.transportInfo` synchronous lookup (API 29+), (2) `WifiManager.connectionInfo` fallback, (3) async `registerNetworkCallback` as last resort with 5s timeout. Does **not** use `WifiManager.startScan()` (deprecated/broken on modern Android).
 - **`PermissionHandler.kt`** — Manages 5 required permissions: `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`, `CHANGE_NETWORK_STATE`, `ACCESS_WIFI_STATE`, `CHANGE_WIFI_STATE`
 - Targets SDK 34, minimum SDK 21, Java 17 compatibility
 
 ### Key Patterns
 
 - **Permission → SSID flow**: Check permissions → request if needed → handle lifecycle resume (user returns from settings) → resolve SSID
-- **Lifecycle observation**: Both `SSIDHelper` and `SSIDResolverMixin` use `WidgetsBindingObserver` to detect app resume after permission dialogs
+- **Lifecycle observation**: `SSIDHelper` uses `WidgetsBindingObserver` directly. `SSIDResolverMixin` delegates to an internal `_SSIDResolverLifecycleObserver` class (using `with WidgetsBindingObserver`) to avoid breaking when Flutter adds new observer methods.
 - **Async patterns differ by platform**: Dart uses Futures, iOS uses completion handlers, Android uses Kotlin coroutines
 - Custom exceptions: `MissingPermissionException` on both platforms
 
@@ -84,4 +84,4 @@ Four methods cross the platform boundary:
 - Dart SDK >=3.0.0 <4.0.0, Flutter >=3.0.0
 - iOS 15.0+
 - Android minSdk 21, compileSdk/targetSdk 34, Kotlin 1.9.0
-- Linting: `flutter_lints` v5 (no custom rules in `analysis_options.yaml`)
+- Linting: `flutter_lints` v6 (no custom rules in `analysis_options.yaml`)
