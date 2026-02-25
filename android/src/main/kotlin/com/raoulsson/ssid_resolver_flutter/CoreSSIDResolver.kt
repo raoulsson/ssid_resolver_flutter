@@ -1,14 +1,12 @@
 package com.raoulsson.ssid_resolver_flutter
 
 import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.util.Log
@@ -33,6 +31,7 @@ class CoreSSIDResolver(
         }
     }
 
+    @SuppressLint("MissingPermission")
     suspend fun fetchSSID(): String {
         Log.d(TAG, "fetchSSID called on thread: ${Thread.currentThread().name}")
 
@@ -42,22 +41,55 @@ class CoreSSIDResolver(
             throw MissingPermissionException("Missing permissions: $deniedPermissions")
         }
 
-        return withTimeout(5000) {
-            suspendCancellableCoroutine { continuation ->
-                var receiverRegistered = false
-                var wifiScanReceiver: BroadcastReceiver? = null
-                var networkCallback: ConnectivityManager.NetworkCallback? = null
-                var hasResumed = false
+        // 1. Try synchronous approach via NetworkCapabilities (API 29+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val ssid = getSSIDFromNetworkCapabilities()
+            if (ssid != null) {
+                Log.d(TAG, "Got SSID from NetworkCapabilities: $ssid")
+                return ssid
+            }
+        }
 
-                val cleanup = {
-                    if (receiverRegistered) {
-                        try {
-                            wifiScanReceiver?.let { context.unregisterReceiver(it) }
-                            receiverRegistered = false
-                        } catch (e: Exception) {
-                            Log.e(TAG, "Error unregistering receiver", e)
-                        }
-                    }
+        // 2. Try deprecated WifiManager.connectionInfo
+        val ssid = getSSIDFromWifiManager()
+        if (ssid != null) {
+            Log.d(TAG, "Got SSID from WifiManager: $ssid")
+            return ssid
+        }
+
+        // 3. Last resort: async callback approach with timeout
+        Log.d(TAG, "Falling back to async network callback")
+        return withTimeout(5000) {
+            getSSIDFromNetworkCallback()
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun getSSIDFromNetworkCapabilities(): String? {
+        val network = connectivityManager.activeNetwork ?: return null
+        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return null
+        if (!capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) return null
+
+        val wifiInfo = capabilities.transportInfo as? WifiInfo ?: return null
+        return extractSSID(wifiInfo.ssid)
+    }
+
+    @SuppressLint("MissingPermission")
+    @Suppress("DEPRECATION")
+    private fun getSSIDFromWifiManager(): String? {
+        val wifiInfo = wifiManager.connectionInfo ?: return null
+        return extractSSID(wifiInfo.ssid)
+    }
+
+    private suspend fun getSSIDFromNetworkCallback(): String {
+        return suspendCancellableCoroutine { continuation ->
+            var networkCallback: ConnectivityManager.NetworkCallback? = null
+            var hasResumed = false
+
+            val safeResume = { result: String ->
+                if (!hasResumed) {
+                    hasResumed = true
                     networkCallback?.let {
                         try {
                             connectivityManager.unregisterNetworkCallback(it)
@@ -65,100 +97,62 @@ class CoreSSIDResolver(
                             Log.e(TAG, "Error unregistering callback", e)
                         }
                     }
+                    continuation.resume(result)
                 }
+            }
 
-                val safeResume = { result: String ->
-                    if (!hasResumed) {
-                        hasResumed = true
-                        cleanup()
-                        continuation.resume(result)
-                    }
-                }
-
-                continuation.invokeOnCancellation {
-                    cleanup()
-                }
-
-                networkCallback = object : ConnectivityManager.NetworkCallback() {
-                    @RequiresApi(Build.VERSION_CODES.R)
-                    override fun onCapabilitiesChanged(
-                        network: Network,
-                        capabilities: NetworkCapabilities
-                    ) {
-                        super.onCapabilitiesChanged(network, capabilities)
-                        try {
-                            wifiScanReceiver = object : BroadcastReceiver() {
-                                @SuppressLint("MissingPermission")
-                                override fun onReceive(context: Context, intent: Intent) {
-                                    val scanResults = wifiManager.scanResults
-                                    val connectedBssid = wifiManager.connectionInfo?.bssid
-                                    val connectedNetwork = scanResults.firstOrNull {
-                                        it.BSSID == connectedBssid
-                                    }
-
-                                    if (connectedNetwork != null) {
-                                        val ssid = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                            connectedNetwork.wifiSsid.toString()
-                                        } else {
-                                            connectedNetwork.SSID
-                                        }.removeSurrounding("\"")
-
-                                        if (ssid.isNotEmpty() && ssid != "<unknown ssid>") {
-                                            safeResume(ssid)
-                                        } else {
-                                            safeResume("Unknown")
-                                        }
-                                    } else if (scanResults.isNotEmpty()) {
-                                        val strongestNetwork = scanResults.maxByOrNull { it.level }
-                                        if (strongestNetwork != null) {
-                                            val ssid = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                                strongestNetwork.wifiSsid.toString()
-                                            } else {
-                                                strongestNetwork.SSID
-                                            }.removeSurrounding("\"")
-
-                                            if (ssid.isNotEmpty() && ssid != "<unknown ssid>") {
-                                                safeResume(ssid)
-                                            } else {
-                                                safeResume("Unknown")
-                                            }
-                                        } else {
-                                            safeResume("Unknown")
-                                        }
-                                    } else {
-                                        safeResume("Unknown")
-                                    }
-                                }
-                            }
-
-                            val intentFilter = IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
-                            context.registerReceiver(wifiScanReceiver, intentFilter)
-                            receiverRegistered = true
-                            wifiManager.startScan()
-
-                        } catch (e: Exception) {
-                            Log.e(TAG, "Error in callback", e)
-                            safeResume("Unknown")
+            networkCallback = object : ConnectivityManager.NetworkCallback() {
+                @SuppressLint("MissingPermission")
+                override fun onCapabilitiesChanged(
+                    network: Network,
+                    capabilities: NetworkCapabilities
+                ) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        val wifiInfo = capabilities.transportInfo as? WifiInfo
+                        val ssid = wifiInfo?.ssid?.let { extractSSID(it) }
+                        if (ssid != null) {
+                            safeResume(ssid)
+                            return
                         }
                     }
-
-                    override fun onLost(network: Network) {
-                        super.onLost(network)
-                        safeResume("Unknown")
-                    }
+                    // Fallback to WifiManager for older APIs
+                    @Suppress("DEPRECATION")
+                    val ssid = wifiManager.connectionInfo?.ssid?.let { extractSSID(it) }
+                    safeResume(ssid ?: "Unknown")
                 }
 
-                try {
-                    val request = NetworkRequest.Builder()
-                        .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                        .build()
-                    connectivityManager.requestNetwork(request, networkCallback)
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error requesting network", e)
+                override fun onLost(network: Network) {
+                    super.onLost(network)
                     safeResume("Unknown")
                 }
             }
+
+            continuation.invokeOnCancellation {
+                networkCallback?.let {
+                    try {
+                        connectivityManager.unregisterNetworkCallback(it)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error unregistering callback", e)
+                    }
+                }
+            }
+
+            try {
+                val request = NetworkRequest.Builder()
+                    .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                    .build()
+                connectivityManager.registerNetworkCallback(request, networkCallback!!)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error registering network callback", e)
+                safeResume("Unknown")
+            }
         }
+    }
+
+    private fun extractSSID(rawSSID: String?): String? {
+        if (rawSSID == null) return null
+        val ssid = rawSSID.removeSurrounding("\"")
+        return if (ssid.isNotEmpty() && ssid != "<unknown ssid>") ssid else null
     }
 
     companion object {
