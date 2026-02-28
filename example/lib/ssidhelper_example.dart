@@ -3,7 +3,7 @@ import 'package:ssid_resolver_flutter/ssid_helper.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyClientTwo());
+  runApp(const SSIDHelperExample());
 }
 
 /// Example class to demonstrate how to use the SSID Resolver plugin with the SSIDManager.
@@ -11,14 +11,14 @@ void main() {
 /// once and then resolve the SSID whenever you need it. So this code is much simpler.
 /// The initial call that triggers the OS permission dialog is done by the SSIDManager
 /// on initialization. Thus, whe clicking the button, the SSID is resolved immediately.
-class MyClientTwo extends StatefulWidget {
-  const MyClientTwo({super.key});
+class SSIDHelperExample extends StatefulWidget {
+  const SSIDHelperExample({super.key});
 
   @override
-  State<MyClientTwo> createState() => _MyClientTwoState();
+  State<SSIDHelperExample> createState() => _SSIDHelperExampleState();
 }
 
-class _MyClientTwoState extends State<MyClientTwo> {
+class _SSIDHelperExampleState extends State<SSIDHelperExample> {
   final _ssidManager = SSIDHelper();
   String _ssid = '';
 

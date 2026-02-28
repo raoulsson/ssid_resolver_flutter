@@ -12,20 +12,20 @@ class MixinExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: MyClientOne(),
+      home: SSIDMixinExample(),
     );
   }
 }
 
-class MyClientOne extends StatefulWidget {
-  const MyClientOne({super.key});
+class SSIDMixinExample extends StatefulWidget {
+  const SSIDMixinExample({super.key});
 
   @override
-  State<MyClientOne> createState() => _MyClientOneState();
+  State<SSIDMixinExample> createState() => _SSIDMixinExampleState();
 }
 
-class _MyClientOneState extends State<MyClientOne>
-    with SSIDResolverMixin<MyClientOne> {
+class _SSIDMixinExampleState extends State<SSIDMixinExample>
+    with SSIDResolverMixin<SSIDMixinExample> {
   String _ssid = '';
 
   @override

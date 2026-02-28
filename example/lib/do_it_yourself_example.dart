@@ -9,17 +9,17 @@ import 'package:ssid_resolver_flutter/ssid_resolver_flutter.dart';
 /// handle the permission request flow.
 /// If this looks too complicated, consider using the SimpleUsageExample.
 void main() {
-  runApp(const MyClientThree());
+  runApp(const DIYExample());
 }
 
-class MyClientThree extends StatefulWidget {
-  const MyClientThree({super.key});
+class DIYExample extends StatefulWidget {
+  const DIYExample({super.key});
 
   @override
-  State<MyClientThree> createState() => _MyClientThreeState();
+  State<DIYExample> createState() => _DIYExampleState();
 }
 
-class _MyClientThreeState extends State<MyClientThree>
+class _DIYExampleState extends State<DIYExample>
     with WidgetsBindingObserver {
   final _ssidResolver = SSIDResolver();
   String _ssid = '';
