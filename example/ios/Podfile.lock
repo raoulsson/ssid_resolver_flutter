@@ -14,7 +14,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/ssid_resolver_flutter/ios"
 
 SPEC CHECKSUMS:
-  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   ssid_resolver_flutter: e540e42f1b8f9230e18c12a640cb754c3cdab6e6
 
 PODFILE CHECKSUM: 9ded030a97e28d5a5c4c872e8e1ec107f9cd5b75
