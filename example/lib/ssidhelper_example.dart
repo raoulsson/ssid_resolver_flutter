@@ -1,6 +1,7 @@
 // example/lib/using_ssidhelper_example.dart
-import 'package:ssid_resolver_flutter/ssid_helper.dart';
+import 'package:example/simulator_warning.dart';
 import 'package:flutter/material.dart';
+import 'package:ssid_resolver_flutter/ssid_helper.dart';
 
 void main() {
   runApp(const SSIDHelperExample());
@@ -48,6 +49,7 @@ class _SSIDHelperExampleState extends State<SSIDHelperExample> {
     return MaterialApp(
       home: Scaffold(
         backgroundColor: const Color(0xFF142467),
+        bottomNavigationBar: const SimulatorWarning(),
         body: SafeArea(
           child: SingleChildScrollView(
             child: Padding(

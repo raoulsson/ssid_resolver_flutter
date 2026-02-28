@@ -2,6 +2,7 @@
 import 'dart:developer' as developer;
 import 'dart:io';
 
+import 'package:example/simulator_warning.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ssid_resolver_flutter/ssid_resolver_flutter.dart';
@@ -97,6 +98,7 @@ class _DebugAppState extends State<DebugApp> {
     return MaterialApp(
       home: Scaffold(
         backgroundColor: const Color(0xFF142467),
+        bottomNavigationBar: const SimulatorWarning(),
         body: SafeArea(
           child: SingleChildScrollView(
             child: Padding(

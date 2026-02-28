@@ -1,4 +1,5 @@
 // example/lib/with_ssidresolver_mixin_example.dart
+import 'package:example/simulator_warning.dart';
 import 'package:flutter/material.dart';
 import 'package:ssid_resolver_flutter/ssid_resolver_mixin.dart';
 
@@ -39,6 +40,7 @@ class _SSIDMixinExampleState extends State<SSIDMixinExample>
       body: Center(
         child: Text("Your Wi-Fi SSID is: $_ssid"),
       ),
+      bottomNavigationBar: const SimulatorWarning(),
     );
   }
 }

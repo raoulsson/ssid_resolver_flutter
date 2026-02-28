@@ -1,3 +1,4 @@
+import 'package:example/simulator_warning.dart';
 import 'package:flutter/material.dart';
 import 'package:ssid_resolver_flutter/ssid_resolver_mixin.dart';
 
@@ -36,6 +37,7 @@ class _SSIDExampleState extends State<SSIDExample>
           style: const TextStyle(fontSize: 24),
         ),
       ),
+      bottomNavigationBar: const SimulatorWarning(),
     );
   }
 }

@@ -1,6 +1,9 @@
 # ssid_resolver_flutter - "Get my Wi-Fi Name"
 
-A flutter plugin to resolve the SSID of the connected wireless LAN, or simply: "Get my Wi-Fi Name".  
+A flutter plugin to resolve the SSID of the connected wireless LAN, or simply: "Get my Wi-Fi Name".
+
+> [!WARNING]
+> This plugin only works on **physical devices**. SSID resolution is not supported on iOS Simulators or Android Emulators.
 
 > [!TIP]
 > **TLDR**: Add the mixin class `SSIDResolverMixin` to your view and implement the `onSSIDResolved` method.

@@ -1,6 +1,7 @@
 // example/lib/do_it_yourself_example.dart
 import 'dart:async';
 
+import 'package:example/simulator_warning.dart';
 import 'package:flutter/material.dart';
 import 'package:ssid_resolver_flutter/ssid_resolver_flutter.dart';
 
@@ -90,6 +91,7 @@ class _DIYExampleState extends State<DIYExample>
     return MaterialApp(
       home: Scaffold(
         backgroundColor: const Color(0xFF142467),
+        bottomNavigationBar: const SimulatorWarning(),
         body: SafeArea(
           child: SingleChildScrollView(
             child: Padding(
