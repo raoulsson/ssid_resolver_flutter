@@ -1,3 +1,11 @@
+## 1.4.0
+
+* Added missing `ACCESS_NETWORK_STATE` permission to plugin and example manifests.
+* Upgraded Kotlin from 1.9.0 to 2.1.0.
+* Improved example for pub.dev: `main.dart` is now a self-contained example instead of a proxy.
+* Renamed example classes for clarity (`SSIDMixinExample`, `SSIDHelperExample`, `DIYExample`).
+* Added persistent simulator/emulator warning to all example screens and README.
+
 ## 1.3.0
 
 * Fixed Android SSID resolution timeout on modern Android (API 29+). Replaced deprecated `WifiManager.startScan()` with synchronous `NetworkCapabilities.transportInfo` lookup, fixing 5-second timeouts on Android 16 (API 36) and other recent versions.

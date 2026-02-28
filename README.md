@@ -5,16 +5,19 @@ A flutter plugin to resolve the SSID of the connected wireless LAN, or simply: "
 > [!WARNING]
 > This plugin only works on **physical devices**. SSID resolution is not supported on iOS Simulators or Android Emulators.
 
-> [!TIP]
-> **TLDR**: Add the mixin class `SSIDResolverMixin` to your view and implement the `onSSIDResolved` method.
-
-This will trigger the permission request dialog if needed and resolve the SSID in one step. 
-See below: [Using SSIDResolver Mixin](#1-using-ssidresolver-mixin).
+> [!IMPORTANT]
+> **Version 1.4.0**: Added missing `ACCESS_NETWORK_STATE` permission, upgraded **Kotlin to 2.1.0**, and improved examples.
 
 ---
 
 > [!IMPORTANT]
 > **Version 1.3.0**: Fixed Android SSID resolution timeout on modern Android (API 29+) and fixed compatibility with newer Flutter versions.
+
+---
+
+> [!TIP]
+> **TLDR**: Add the mixin class `SSIDResolverMixin` to your view and implement the `onSSIDResolved` method. This will trigger the permission request dialog if needed and resolve the SSID in one step.
+See below: [Using SSIDResolver Mixin](#1-using-ssidresolver-mixin).
 
 ---
 
@@ -125,6 +128,7 @@ For Android, the `AndroidManifest.xml` file needs these permissions:
 ```xml
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
 <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
@@ -161,7 +165,7 @@ and [here for iOS](https://github.com/raoulsson/ssid_resolver_flutter/blob/maste
 Add the mixin class `SSIDResolverMixin` to your view and implement the `onSSIDResolved` method.
 
 ```dart
-  class _MyClientOneState extends State<MyClientOne> with SSIDResolverMixin<MyClientOne> {
+  class _SSIDMixinExampleState extends State<SSIDMixinExample> with SSIDResolverMixin<SSIDMixinExample> {
         ...
         @override
         void onSSIDChanged(String ssid) {
@@ -176,13 +180,13 @@ This will trigger the permission request dialog if needed and resolve the SSID i
 Here is the full client code that takes full advantage of the plugin for Wi-Fi SSID resolution:
 
 ```dart
-    class MyClientOne extends StatefulWidget {
-      const MyClientOne({super.key});
+    class SSIDMixinExample extends StatefulWidget {
+      const SSIDMixinExample({super.key});
       @override
-      State<MyClientOne> createState() => _MyClientOneState();
+      State<SSIDMixinExample> createState() => _SSIDMixinExampleState();
     }
     
-    class _MyClientOneState extends State<MyClientOne> with SSIDResolverMixin<MyClientOne> {
+    class _SSIDMixinExampleState extends State<SSIDMixinExample> with SSIDResolverMixin<SSIDMixinExample> {
       String _ssid = '';
     
       @override
@@ -260,7 +264,7 @@ take over and show the permission dialog. Thus, when the app is resumed, the obs
 the permission status and continue the flow.
 
 ```dart
-class _MyClientThreeState extends State<MyClientThree> with WidgetsBindingObserver {
+class _DIYExampleState extends State<DIYExample> with WidgetsBindingObserver {
   final _ssidResolver = SSIDResolver();
   String _ssid = '';
   bool _isRequestingPermission = false;

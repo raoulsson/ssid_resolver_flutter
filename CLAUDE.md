@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-`ssid_resolver_flutter` is a Flutter plugin (v1.3.0) that resolves the connected WiFi SSID on iOS and Android with full permission handling. Published at https://github.com/raoulsson/ssid_resolver_flutter.
+`ssid_resolver_flutter` is a Flutter plugin (v1.4.0) that resolves the connected WiFi SSID on iOS and Android with full permission handling. Published at https://github.com/raoulsson/ssid_resolver_flutter.
 
 ## Common Commands
 
@@ -69,7 +69,7 @@ Four methods cross the platform boundary:
 
 - **`SsidResolverFlutterPlugin.kt`** — Plugin entry point; implements `FlutterPlugin`, `ActivityAware`, `RequestPermissionsResultListener`; uses Kotlin coroutines for async
 - **`CoreSSIDResolver.kt`** — Three-tier SSID resolution: (1) `NetworkCapabilities.transportInfo` synchronous lookup (API 29+), (2) `WifiManager.connectionInfo` fallback, (3) async `registerNetworkCallback` as last resort with 5s timeout. Does **not** use `WifiManager.startScan()` (deprecated/broken on modern Android).
-- **`PermissionHandler.kt`** — Manages 5 required permissions: `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`, `CHANGE_NETWORK_STATE`, `ACCESS_WIFI_STATE`, `CHANGE_WIFI_STATE`
+- **`PermissionHandler.kt`** — Manages 6 required permissions: `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`, `ACCESS_NETWORK_STATE`, `CHANGE_NETWORK_STATE`, `ACCESS_WIFI_STATE`, `CHANGE_WIFI_STATE`
 - Targets SDK 34, minimum SDK 21, Java 17 compatibility
 
 ### Key Patterns
@@ -83,5 +83,5 @@ Four methods cross the platform boundary:
 
 - Dart SDK >=3.0.0 <4.0.0, Flutter >=3.0.0
 - iOS 15.0+
-- Android minSdk 21, compileSdk/targetSdk 34, Kotlin 1.9.0
+- Android minSdk 21, compileSdk/targetSdk 34, Kotlin 2.1.0
 - Linting: `flutter_lints` v6 (no custom rules in `analysis_options.yaml`)
