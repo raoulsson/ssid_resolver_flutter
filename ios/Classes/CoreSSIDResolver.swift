@@ -2,24 +2,24 @@ import Foundation
 import CoreLocation
 import NetworkExtension
 
-class MissingPermissionException: Error {
+class MissingPermissionException: LocalizedError {
     let missingPermissions: [String]
 
     init(_ missingPermissions: [String]) {
         self.missingPermissions = missingPermissions
     }
 
-    var localizedDescription: String {
+    var errorDescription: String? {
         return "Missing permissions: \(missingPermissions.joined(separator: ", "))"
     }
 }
 
-enum SSIDResolverError: Error {
+enum SSIDResolverError: LocalizedError {
     case noWifiConnection
     case ssidWithheld
     case unknown
 
-    var localizedDescription: String {
+    var errorDescription: String? {
         switch self {
         case .noWifiConnection:
             return "Not connected to any WiFi network"
