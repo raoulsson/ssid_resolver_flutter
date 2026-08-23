@@ -1,5 +1,7 @@
 package com.raoulsson.ssid_resolver_flutter
 
+import android.content.Context
+import android.net.ConnectivityManager
 import android.util.Log
 import java.net.Inet4Address
 import java.net.InterfaceAddress
@@ -14,14 +16,73 @@ import java.util.Collections
  * and works for any interface (WiFi, ethernet, tunnels), which is what a UDP
  * discovery caller actually needs to pick the right broadcast address.
  *
- * Kept in lockstep with the copy in the standalone ssid-resolver-android app.
+ * Kept in lockstep with the copy in the standalone ssid-resolver-android app
+ * (core/NetworkInterfaceResolver.kt), which is where this one was lifted from.
  */
-class NetworkInterfaceResolver {
+class NetworkInterfaceResolver(private val context: Context? = null) {
 
     fun fetchInterfaces(): List<Map<String, Any>> {
+        val fromJavaNet = fetchViaNetworkInterface()
+        if (fromJavaNet.isNotEmpty()) return fromJavaNet
+
+        // Android 11 restricted /proc/net, and on some devices (observed on a
+        // Samsung running Android 15) NetworkInterface.getNetworkInterfaces()
+        // returns null outright rather than throwing. ConnectivityManager is the
+        // supported route and gives the prefix length directly; it needs only
+        // ACCESS_NETWORK_STATE, which is not a runtime permission.
+        val fromConnectivity = fetchViaConnectivityManager()
+        if (fromConnectivity.isEmpty()) {
+            Log.w(TAG, "No IPv4 interfaces found by either NetworkInterface or ConnectivityManager")
+        }
+        return fromConnectivity
+    }
+
+    private fun fetchViaConnectivityManager(): List<Map<String, Any>> {
+        val cm = context?.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+            ?: run {
+                Log.w(TAG, "No context available, cannot fall back to ConnectivityManager")
+                return emptyList()
+            }
         return try {
             val result = mutableListOf<Map<String, Any>>()
-            val interfaces = Collections.list(NetworkInterface.getNetworkInterfaces())
+            for (network in cm.allNetworks) {
+                val link = cm.getLinkProperties(network) ?: continue
+                val name = link.interfaceName ?: "?"
+                for (linkAddress in link.linkAddresses) {
+                    val address = linkAddress.address
+                    if (address !is Inet4Address) continue
+                    val prefixLength = linkAddress.prefixLength
+                    val maskInt = prefixLengthToMask(prefixLength)
+                    val described = mapOf(
+                        "name" to name,
+                        "ip" to (address.hostAddress ?: "?"),
+                        "netmask" to intToIp(maskInt),
+                        "broadcast" to intToIp(deriveBroadcast(ipToInt(address), maskInt)),
+                        "prefixLength" to prefixLength
+                    )
+                    Log.d(TAG, "interface (ConnectivityManager) $described")
+                    result.add(described)
+                }
+            }
+            result
+        } catch (e: Exception) {
+            Log.e(TAG, "ConnectivityManager enumeration failed", e)
+            emptyList()
+        }
+    }
+
+    private fun fetchViaNetworkInterface(): List<Map<String, Any>> {
+        return try {
+            val result = mutableListOf<Map<String, Any>>()
+            // getNetworkInterfaces() is documented to return null when there are
+            // no interfaces, and does so on restricted Android builds. Passing
+            // that straight to Collections.list throws NPE.
+            val enumeration = NetworkInterface.getNetworkInterfaces()
+            if (enumeration == null) {
+                Log.w(TAG, "NetworkInterface.getNetworkInterfaces() returned null")
+                return emptyList()
+            }
+            val interfaces = Collections.list(enumeration)
             for (netIf in interfaces) {
                 for (ifAddr in netIf.interfaceAddresses) {
                     val address = ifAddr.address

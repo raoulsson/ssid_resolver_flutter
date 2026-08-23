@@ -26,7 +26,7 @@ class SsidResolverFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware
   private var activity: Activity? = null
   private lateinit var coreResolver: CoreSSIDResolver
   private lateinit var permissionHandler: PermissionHandler
-  private val networkInterfaceResolver = NetworkInterfaceResolver()
+  private lateinit var networkInterfaceResolver: NetworkInterfaceResolver
   private val scope = CoroutineScope(Dispatchers.Main)
   private var pendingResult: Result? = null
 
@@ -35,6 +35,10 @@ class SsidResolverFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware
     channel.setMethodCallHandler(this)
     permissionHandler = PermissionHandler(flutterPluginBinding.applicationContext)
     coreResolver = CoreSSIDResolver(flutterPluginBinding.applicationContext, permissionHandler)
+    // Context lets the resolver fall back to ConnectivityManager when the
+    // platform blocks NetworkInterface enumeration, which Android 11+ does on
+    // some devices - without it the interface list is silently empty there.
+    networkInterfaceResolver = NetworkInterfaceResolver(flutterPluginBinding.applicationContext)
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {

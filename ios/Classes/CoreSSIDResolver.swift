@@ -16,12 +16,20 @@ class MissingPermissionException: Error {
 
 enum SSIDResolverError: Error {
     case noWifiConnection
+    case ssidWithheld
     case unknown
 
     var localizedDescription: String {
         switch self {
         case .noWifiConnection:
             return "Not connected to any WiFi network"
+        case .ssidWithheld:
+            // fetchCurrent() returning nil has more than one cause. Reporting the
+            // entitlement as fact misleads users on captive and enterprise networks
+            // that withhold the name no matter what the app is allowed to do.
+            return "Connected to WiFi, but iOS did not return the network name. "
+                + "This needs the Access WiFi Information entitlement; captive, "
+                + "enterprise and some guest networks also withhold it."
         case .unknown:
             return "Unknown error occurred while fetching WiFi information"
         }
@@ -83,19 +91,28 @@ class CoreSSIDResolver: NSObject, CLLocationManagerDelegate {
             return
         }
 
-        checkAccessWiFiEntitlement { hasWiFi in
-            guard hasWiFi else {
-                completion(nil, MissingPermissionException(["WiFi"]))
+        guard #available(iOS 13.0, *) else {
+            completion(nil, SSIDResolverError.unknown)
+            return
+        }
+
+        // No pre-flight entitlement probe: the probe was itself a fetchCurrent
+        // call, so it could only ever report "nil" as "missing entitlement".
+        // Attempt the real fetch, then explain a nil result honestly.
+        NEHotspotNetwork.fetchCurrent { network in
+            if let ssid = network?.ssid, !ssid.isEmpty {
+                completion(ssid, nil)
                 return
             }
-
-            if #available(iOS 13.0, *) {
-                NEHotspotNetwork.fetchCurrent { network in
-                    completion(network?.ssid ?? "Unknown", nil)
-                }
-            } else {
-                completion("Unknown", nil)
+            // The interface table needs no permission, so it can distinguish
+            // "not on WiFi" from "on WiFi but the name is withheld" - which the
+            // old code reported identically, as a missing permission.
+            let onWifi = NetworkInterfaceResolver.fetchAll().contains { iface in
+                iface.name.hasPrefix("en")
+                    && !iface.ip.hasPrefix("169.254.")
+                    && !iface.ip.hasPrefix("127.")
             }
+            completion(nil, onWifi ? SSIDResolverError.ssidWithheld : SSIDResolverError.noWifiConnection)
         }
     }
 }
