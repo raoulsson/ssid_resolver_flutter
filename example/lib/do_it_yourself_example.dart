@@ -88,8 +88,15 @@ class _DIYExampleState extends State<DIYExample>
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
+    return Scaffold(
+      // AppBar rather than a bare Scaffold or a nested MaterialApp: these are
+      // pushed onto the home list, and without one there is no way back.
+      appBar: AppBar(
+        title: const Text('SSID do-it-yourself'),
+        backgroundColor: const Color(0xFF142467),
+        foregroundColor: Colors.white,
+      ),
+
         backgroundColor: const Color(0xFF142467),
         bottomNavigationBar: const SimulatorWarning(),
         body: SafeArea(
@@ -150,7 +157,7 @@ class _DIYExampleState extends State<DIYExample>
             ),
           ),
         ),
-      ),
+
     );
   }
 }

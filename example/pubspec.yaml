@@ -31,6 +31,9 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # Example-only: opens the repository link on the home screen.
+  url_launcher: ^6.2.0
+
   ssid_resolver_flutter:
     # When depending on this package from a real application you should use:
     #   ssid_resolver_flutter: ^x.y.z

@@ -46,8 +46,15 @@ class _SSIDHelperExampleState extends State<SSIDHelperExample> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
+    return Scaffold(
+      // AppBar rather than a bare Scaffold or a nested MaterialApp: these are
+      // pushed onto the home list, and without one there is no way back.
+      appBar: AppBar(
+        title: const Text('SSID via SSIDHelper'),
+        backgroundColor: const Color(0xFF142467),
+        foregroundColor: Colors.white,
+      ),
+
         backgroundColor: const Color(0xFF142467),
         bottomNavigationBar: const SimulatorWarning(),
         body: SafeArea(
@@ -108,7 +115,7 @@ class _SSIDHelperExampleState extends State<SSIDHelperExample> {
             ),
           ),
         ),
-      ),
+
     );
   }
 }

@@ -37,6 +37,13 @@ class _SSIDMixinExampleState extends State<SSIDMixinExample>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // AppBar rather than a bare Scaffold or a nested MaterialApp: these are
+      // pushed onto the home list, and without one there is no way back.
+      appBar: AppBar(
+        title: const Text('SSID via SSIDResolverMixin'),
+        backgroundColor: const Color(0xFF142467),
+        foregroundColor: Colors.white,
+      ),
       body: Center(
         child: Text("Your Wi-Fi SSID is: $_ssid"),
       ),

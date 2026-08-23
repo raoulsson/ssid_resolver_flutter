@@ -3,6 +3,7 @@ import 'package:example/ssidhelper_example.dart';
 import 'package:example/ssidresolver_mixin_example.dart';
 import 'package:example/do_it_yourself_example.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:ssid_resolver_flutter/ssid_helper.dart';
 
 import 'simulator_warning.dart';
@@ -33,12 +34,6 @@ class ExampleHome extends StatelessWidget {
           children: [
             _tile(
               context,
-              title: 'Network Interfaces (1.5.0)',
-              subtitle: 'Hardware validation for fetchNetworkInterfaces() / broadcastAddresses()',
-              builder: (_) => const NetworkInterfacesExample(),
-            ),
-            _tile(
-              context,
               title: 'SSID via SSIDHelper',
               subtitle: 'Button-triggered SSID resolve using SSIDHelper',
               builder: (_) => const SSIDExample(),
@@ -61,8 +56,31 @@ class ExampleHome extends StatelessWidget {
               subtitle: 'Manual permission handling without SSIDHelper',
               builder: (_) => const DIYExample(),
             ),
+            _tile(
+              context,
+              title: 'Network Interfaces (1.5.0)',
+              subtitle: 'Hardware validation for fetchNetworkInterfaces() / broadcastAddresses()',
+              builder: (_) => const NetworkInterfacesExample(),
+            ),
+            const SizedBox(height: 8),
+            // Below the examples rather than among them: the repository is not
+            // one more thing to try, it is where you go after trying them.
+            _repoLink(),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _repoLink() {
+    return Center(
+      child: TextButton.icon(
+        onPressed: () => launchUrl(
+          Uri.parse('https://github.com/raoulsson/ssid_resolver_flutter'),
+          mode: LaunchMode.externalApplication,
+        ),
+        icon: const Icon(Icons.open_in_new, size: 18),
+        label: const Text('github.com/raoulsson/ssid_resolver_flutter'),
       ),
     );
   }
@@ -125,6 +143,12 @@ class _SSIDExampleState extends State<SSIDExample> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF142467),
+      // Pushed from the home list, so it needs its own bar to get back from.
+      appBar: AppBar(
+        title: const Text('SSID via SSIDHelper'),
+        backgroundColor: const Color(0xFF142467),
+        foregroundColor: Colors.white,
+      ),
       bottomNavigationBar: const SimulatorWarning(),
       body: SafeArea(
         child: SingleChildScrollView(
