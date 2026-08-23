@@ -8,40 +8,19 @@ A flutter plugin to resolve the SSID of the connected wireless LAN, or simply: "
 > SSID resolution (`resolveSSID()`) only works on **physical devices** — it is not supported on iOS Simulators or Android Emulators. The network interface API added in 1.5.0 (below) works everywhere.
 
 > [!IMPORTANT]
-> **Version 1.5.0 - netmask and real broadcast addresses.**
+> **1.5.0 - the delta: device discovery now works on networks that are not `/24`.**
 >
-> **What you could not do:** get a netmask. Dart's `NetworkInterface` gives you interface names and
-> addresses and stops there. So code that needs a UDP broadcast address guesses it the only way
-> available - take the first three octets, append `.255`. This is near-universal, and it is worth
-> checking whatever you currently call for a broadcast address: the helper you are using very likely
-> does exactly this internally.
+> You can read the **real netmask** and get a broadcast address derived from it, on both platforms,
+> with no permission of any kind. Before this, every broadcast address in the Dart ecosystem was a
+> guess - first three octets plus `.255` - because `NetworkInterface` never exposed a netmask.
 >
-> That guess is right on a `/24` and wrong on everything else. On a `/20`, a host at `10.8.2.77` has
-> its broadcast at `10.8.15.255`; the guessed `10.8.2.255` is an ordinary host address in the middle
-> of the range, so the packet is unicast to a host that does not exist and dies. **No error, no
-> exception, no log line** - discovery just finds nothing, which looks exactly like an empty network.
-> There is no escape hatch either: the limited broadcast `255.255.255.255` returns `EADDRNOTAVAIL`
-> on Darwin, bound to `0.0.0.0` or to the interface address alike.
+> That guess is correct on a `/24` and silently wrong on a `/20`, `/22` or `/16`, which is what
+> corporate, campus, guest and mesh networks routinely hand out. Wrong in the worst way: the send
+> succeeds, nothing throws, and the packet reaches nobody.
 >
-> **What you can do now:** ask the OS. `fetchNetworkInterfaces()` returns every IPv4 interface with
-> its real `netmask`, `prefixLength` and computed `broadcast` - `getifaddrs` on iOS,
-> `java.net.NetworkInterface` on Android. `broadcastAddresses()` returns just the ones worth sending
-> to.
->
-> - **No permission required.** SSID resolution needs Location and returns "Unknown" when the user
->   denies it. The interface table needs nothing, so this keeps working on a device where Location is
->   denied - and on simulators and emulators, unlike `resolveSSID()`.
-> - **Every interface, not only Wi-Fi**: ethernet, tunnels and cellular, which is what makes correct
->   filtering possible rather than accidental.
-> - **Cellular is excluded from `broadcastAddresses()` deliberately.** iOS cellular carries a `/32`,
->   and for a `/32` the derived broadcast equals the interface's own address. Unfiltered, the list
->   would hand you your own phone and send discovery over mobile data into nothing - the same silent
->   hole, one interface over.
->
-> The two platforms derive the answer in opposite directions - iOS counts the leading one bits of the
-> mask the kernel reports, Android builds the mask from the kernel's prefix length - so their
-> agreement is a real cross-check. Verified against Python's `ipaddress` across every prefix `/0` to
-> `/32` for six host addresses, including the high-bit cases where signed 32-bit shifts go wrong.
+> It does **not** defeat client isolation or a separate IoT VLAN - those are routing decisions no app
+> can override. What it fixes is the case where the devices are reachable and the broadcast address
+> was simply pointing at nothing. [The details, with the numbers](#the-netmask-problem-in-detail).
 
 ---
 
@@ -129,6 +108,41 @@ to find. Discovery quietly returns nothing and the network gets the blame.
 The interface list also shows why filtering is correctness rather than tidiness: `wlan0` is tagged
 USABLE LAN, `lo` loopback, and `rmnet_data9` cellular on a `/30`. Broadcasting to the cellular
 interface would push discovery traffic over mobile data to reach nothing at all.
+
+## The netmask problem in detail
+
+**What you could not do:** get a netmask. Dart's `NetworkInterface` gives you interface names and
+addresses and stops there. So code that needs a UDP broadcast address guesses it the only way
+available - take the first three octets, append `.255`. This is near-universal, and it is worth
+checking whatever you currently call for a broadcast address: the helper you are using very likely
+does exactly this internally.
+
+That guess is right on a `/24` and wrong on everything else. On a `/20`, a host at `10.8.2.77` has
+its broadcast at `10.8.15.255`; the guessed `10.8.2.255` is an ordinary host address in the middle
+of the range, so the packet is unicast to a host that does not exist and dies. **No error, no
+exception, no log line** - discovery just finds nothing, which looks exactly like an empty network.
+There is no escape hatch either: the limited broadcast `255.255.255.255` returns `EADDRNOTAVAIL`
+on Darwin, bound to `0.0.0.0` or to the interface address alike.
+
+**What you can do now:** ask the OS. `fetchNetworkInterfaces()` returns every IPv4 interface with
+its real `netmask`, `prefixLength` and computed `broadcast` - `getifaddrs` on iOS,
+`java.net.NetworkInterface` on Android. `broadcastAddresses()` returns just the ones worth sending
+to.
+
+- **No permission required.** SSID resolution needs Location and returns "Unknown" when the user
+  denies it. The interface table needs nothing, so this keeps working on a device where Location is
+  denied - and on simulators and emulators, unlike `resolveSSID()`.
+- **Every interface, not only Wi-Fi**: ethernet, tunnels and cellular, which is what makes correct
+  filtering possible rather than accidental.
+- **Cellular is excluded from `broadcastAddresses()` deliberately.** iOS cellular carries a `/32`,
+  and for a `/32` the derived broadcast equals the interface's own address. Unfiltered, the list
+  would hand you your own phone and send discovery over mobile data into nothing - the same silent
+  hole, one interface over.
+
+The two platforms derive the answer in opposite directions - iOS counts the leading one bits of the
+mask the kernel reports, Android builds the mask from the kernel's prefix length - so their
+agreement is a real cross-check. Verified against Python's `ipaddress` across every prefix `/0` to
+`/32` for six host addresses, including the high-bit cases where signed 32-bit shifts go wrong.
 
 ## Android SSID Resolution
 
