@@ -22,6 +22,8 @@ public class SsidResolverFlutterPlugin: NSObject, FlutterPlugin {
             requestPermission(result: result)
         case "fetchSsid":
             fetchSsid(result: result)
+        case "fetchNetworkInterfaces":
+            fetchNetworkInterfaces(result: result)
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -103,5 +105,13 @@ public class SsidResolverFlutterPlugin: NSObject, FlutterPlugin {
                 ))
             }
         }
+    }
+
+    private func fetchNetworkInterfaces(result: @escaping FlutterResult) {
+        // The caller uses this list to pick where to send discovery traffic;
+        // an exception here would turn into a dead scan rather than a
+        // message, so any failure resolves to an empty list instead of
+        // propagating a FlutterError.
+        result(NetworkInterfaceResolver.fetchAll().map { $0.asDictionary })
     }
 }

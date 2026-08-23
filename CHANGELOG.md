@@ -1,3 +1,25 @@
+## 1.5.0
+
+* **Network interface info**: `fetchNetworkInterfaces()` returns every IPv4 interface with its `name`,
+  `ip`, `netmask`, `broadcast` and `prefixLength`. Dart's own `NetworkInterface` exposes addresses but
+  no netmask, and without a netmask you cannot compute a broadcast address.
+* **`broadcastAddresses()`**: the directed broadcast of each real LAN interface, with loopback,
+  link-local and VPN tunnels filtered out. Computed from the actual netmask, so a /20 host at
+  `10.8.2.77` yields `10.8.15.255` and not the `10.8.2.255` produced by the widespread
+  "replace the last octet with 255" shortcut. That shortcut is only correct on a /24; on anything
+  wider it is an ordinary host address and UDP sent there reaches nothing.
+* Needs **no permission** on either platform: this reads the local interface table (`getifaddrs` on
+  iOS, `java.net.NetworkInterface` on Android), not the WiFi identity that SSID resolution needs
+  Location for. It therefore also works on the iOS Simulator and Android emulators, unlike
+  `resolveSSID()`.
+* Both new methods return an empty list instead of throwing when the platform cannot answer. Callers
+  use this to decide where to send discovery traffic, and an exception there becomes a dead scan
+  rather than a message.
+* Note for anyone with their own `SsidResolverFlutterPlatform`: the new member is added with a
+  default `UnimplementedError` body, so subclasses that `extends` it keep compiling untouched. A class
+  that `implements` the interface instead must add `fetchNetworkInterfaces`. `extends` is the
+  supported form for exactly this reason (see `plugin_platform_interface`).
+
 ## 1.4.0
 
 * Added missing `ACCESS_NETWORK_STATE` permission to plugin and example manifests.

@@ -5,7 +5,21 @@ A flutter plugin to resolve the SSID of the connected wireless LAN, or simply: "
 [![Pub Version](https://img.shields.io/pub/v/ssid_resolver_flutter?style=flat-square)](https://pub.dev/packages/ssid_resolver_flutter)
 
 > [!WARNING]
-> This plugin only works on **physical devices**. SSID resolution is not supported on iOS Simulators or Android Emulators.
+> SSID resolution (`resolveSSID()`) only works on **physical devices** — it is not supported on iOS Simulators or Android Emulators. The network interface API added in 1.5.0 (below) works everywhere.
+
+> [!IMPORTANT]
+> **Version 1.5.0 — netmask and real broadcast addresses.**
+> Dart's `NetworkInterface` gives you addresses but **no netmask**, so apps compute a UDP broadcast as
+> "first three octets + `.255`". That is only correct on a **/24**. On a /20 network a host at
+> `10.8.2.77` has its broadcast at `10.8.15.255`, while `10.8.2.255` is just an unused host address —
+> anything sent there reaches nothing, silently. Device discovery then fails on exactly the wider
+> networks that many routers hand out, with no error to go on.
+>
+> `fetchNetworkInterfaces()` returns each IPv4 interface with its `netmask`, `prefixLength` and true
+> `broadcast`, read from the OS. `broadcastAddresses()` gives you just the ones worth broadcasting to.
+> **Neither needs any permission**, and both work on simulators and emulators — unlike `resolveSSID()`.
+
+---
 
 > [!IMPORTANT]
 > **Version 1.4.0**: Added missing `ACCESS_NETWORK_STATE` permission, upgraded **Kotlin to 2.1.0**, and improved examples.
@@ -20,6 +34,31 @@ A flutter plugin to resolve the SSID of the connected wireless LAN, or simply: "
 > [!TIP]
 > **TLDR**: Add the mixin class `SSIDResolverMixin` to your view and implement the `onSSIDResolved` method. This will trigger the permission request dialog if needed and resolve the SSID in one step.
 See below: [Using SSIDResolver Mixin](#1-using-ssidresolver-mixin).
+
+---
+
+### Network interfaces, netmask and broadcast
+
+```dart
+final resolver = SSIDResolver();
+
+// Where to send UDP discovery: real LAN interfaces only, loopback, link-local
+// and VPN tunnels already filtered out.
+for (final address in await resolver.broadcastAddresses()) {
+  socket.send(payload, InternetAddress(address), port);
+}
+
+// Or the full picture, if you need to choose yourself.
+for (final i in await resolver.fetchNetworkInterfaces()) {
+  print('${i.name} ${i.ip}/${i.prefixLength} mask ${i.netmask} broadcast ${i.broadcast}');
+  // en0 10.8.2.77/20 mask 255.255.240.0 broadcast 10.8.15.255
+}
+```
+
+`NetworkInterfaceInfo` also exposes `isLoopback`, `isLinkLocal`, `isTunnel` and `isUsableLan` so you
+can filter differently if `broadcastAddresses()` is not the split you want. Sending to a tunnel's
+broadcast address is worth avoiding specifically: on iOS an unreachable broadcast can close the socket
+for the sends that follow it.
 
 ---
 

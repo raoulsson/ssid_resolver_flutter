@@ -12,6 +12,17 @@ class MockSsidResolverFlutterPlatform
   Future<String?> getPlatformVersion() => Future.value('42');
 
   @override
+  Future<List<NetworkInterfaceInfo>> fetchNetworkInterfaces() => Future.value(const [
+        NetworkInterfaceInfo(
+          name: 'en0',
+          ip: '10.8.2.77',
+          netmask: '255.255.240.0',
+          broadcast: '10.8.15.255',
+          prefixLength: 20,
+        ),
+      ]);
+
+  @override
   Future<Map<String, dynamic>> checkPermissionStatus() {
     // TODO: implement checkPermissionStatus
     throw UnimplementedError();

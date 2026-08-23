@@ -26,6 +26,7 @@ class SsidResolverFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware
   private var activity: Activity? = null
   private lateinit var coreResolver: CoreSSIDResolver
   private lateinit var permissionHandler: PermissionHandler
+  private val networkInterfaceResolver = NetworkInterfaceResolver()
   private val scope = CoroutineScope(Dispatchers.Main)
   private var pendingResult: Result? = null
 
@@ -41,6 +42,7 @@ class SsidResolverFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware
       "checkPermissionStatus" -> checkPermissionStatus(result)
       "requestPermission" -> requestPermission(result)
       "fetchSsid" -> fetchSsid(result)
+      "fetchNetworkInterfaces" -> fetchNetworkInterfaces(result)
       else -> result.notImplemented()
     }
   }
@@ -98,6 +100,10 @@ class SsidResolverFlutterPlugin: FlutterPlugin, MethodCallHandler, ActivityAware
         result.error("SSID_ERROR", e.message, null)
       }
     }
+  }
+
+  private fun fetchNetworkInterfaces(result: Result) {
+    result.success(networkInterfaceResolver.fetchInterfaces())
   }
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {

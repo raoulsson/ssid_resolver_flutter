@@ -1,4 +1,5 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'network_interface_info.dart';
 import 'ssid_resolver_flutter_method_channel.dart';
 
 abstract class SsidResolverFlutterPlatform extends PlatformInterface {
@@ -36,5 +37,14 @@ abstract class SsidResolverFlutterPlatform extends PlatformInterface {
 
   Future<String> resolveSSID() {
     throw UnimplementedError('fetchSsid() has not been implemented.');
+  }
+
+  /// Every IPv4 interface with its netmask and directed broadcast address.
+  ///
+  /// Needs no permission: this reads the local interface table (getifaddrs on
+  /// iOS, java.net.NetworkInterface on Android), not the WiFi identity that
+  /// [resolveSSID] needs Location for.
+  Future<List<NetworkInterfaceInfo>> fetchNetworkInterfaces() {
+    throw UnimplementedError('fetchNetworkInterfaces() has not been implemented.');
   }
 }
