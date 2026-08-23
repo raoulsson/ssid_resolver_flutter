@@ -110,6 +110,26 @@ Below you can see the example app in action. On the left side you see the Androi
 This plugin is based on my two standalone implementations for [iOS](https://github.com/raoulsson/ssid-resolver-ios)
 and [Android](https://github.com/raoulsson/ssid-resolver-android), both available on GitHub.
 
+### The example app, on a real phone
+
+Captured on a physical Android device on a `/20` network. Run `example/` on a phone to reproduce it.
+
+|                                                                                                                        |                                                                                                                        |
+|------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
+| <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-1-home.jpeg" alt="Example home" width="400"/><br />The four SSID examples, with the 1.5.0 interface harness at the bottom | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-2-ssid-helper.jpeg" alt="SSID resolved" width="400"/><br />`SSIDHelper` resolving `ZH1082Guest` |
+| <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-3-mixin.jpeg" alt="Mixin example" width="400"/><br />`SSIDResolverMixin` auto-resolving on load | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-4-interfaces.jpeg" alt="Interfaces" width="400"/><br />`broadcastAddresses()` returns one address; the naive guess would have been `10.8.2.255` |
+| <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-5-udp-proof.jpeg" alt="UDP proof" width="400"/><br />**Both sends succeed** - see below | |
+
+**The last screenshot is the whole point.** A real UDP send to the correct broadcast `10.8.15.255`
+reports `sent OK`. A send to the naive `10.8.2.255` **also** reports `sent OK`. The socket accepts it,
+nothing throws, nothing logs - the packet simply leaves and reaches nobody, because on a `/20` that
+address belongs to no host. That is why this bug survives for years in a codebase: there is no error
+to find. Discovery quietly returns nothing and the network gets the blame.
+
+The interface list also shows why filtering is correctness rather than tidiness: `wlan0` is tagged
+USABLE LAN, `lo` loopback, and `rmnet_data9` cellular on a `/30`. Broadcasting to the cellular
+interface would push discovery traffic over mobile data to reach nothing at all.
+
 ## Android SSID Resolution
 
 On Android, the plugin resolves the SSID using a three-tier approach:
