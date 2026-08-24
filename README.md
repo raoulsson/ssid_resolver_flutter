@@ -159,8 +159,8 @@ Captured on a physical Android device:
 
 |                                                                                                                        |                                                                                                                        |
 |------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
-| <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-1-home.jpeg" alt="Example home" width="400"/><br />The four SSID examples, with the 1.5.0 interface harness at the bottom | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-2-ssid-helper.jpeg" alt="SSID resolved" width="400"/><br />`SSIDHelper` resolving `ZH1082Guest` |
-| <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-3-mixin.jpeg" alt="Mixin example" width="400"/><br />`SSIDResolverMixin` auto-resolving on load | |
+| <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-1-home.jpeg" alt="Example home" width="400"/><br />The four SSID examples, with the interface harness at the bottom | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-2-ssid-helper.jpeg" alt="SSID resolved" width="400"/><br />`SSIDHelper` resolving a real network name |
+| <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-3-mixin.jpeg" alt="Mixin example" width="400"/><br />`SSIDResolverMixin` resolving automatically on load | |
 
 ## Using the plugin, three ways
 
@@ -340,7 +340,7 @@ Seen on a physical Android phone on a real `/20` network:
 
 |                                                                                                                        |                                                                                                                        |
 |------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
-| <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-4-interfaces.jpeg" alt="Interfaces" width="400"/><br />`broadcastAddresses()` returns one address; the naive guess would have been `10.8.2.255` | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-5-udp-proof.jpeg" alt="UDP proof" width="400"/><br />**Both sends succeed** - see below |
+| <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-4-interfaces.jpeg" alt="Interfaces" width="400"/><br />One address returned. The naive guess would have been `10.8.2.255` | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-5-udp-proof.jpeg" alt="UDP proof" width="400"/><br />Both sends succeed, including the wrong one. See below |
 
 The second screenshot is the whole point. A real UDP send to the correct broadcast `10.8.15.255`
 reports `sent OK`. A send to the naive `10.8.2.255` **also** reports `sent OK`. The socket accepts
