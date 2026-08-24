@@ -67,9 +67,9 @@ with no explanation at all, which App Review notices.
 **3. The capability** - open `ios/Runner/Runner.xcodeproj` in Xcode, go to
 "Signing & Capabilities" on the Runner target and add **Access WiFi Information**:
 
-| Add WiFi Capability 1                                                                                                                                        | Add WiFi Capability 2                                                                                                                                        |
-|--------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/add-wifi-capability-1.png" alt="Add WiFi Capability 1" width="400"/> | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/add-wifi-capability-2.png" alt="Add WiFi Capability 2" width="400"/> |
+<img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/add-wifi-capability-1.png" alt="Add WiFi Capability 1" width="400"/>
+
+<img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/add-wifi-capability-2.png" alt="Add WiFi Capability 2" width="400"/>
 
 This should leave `ios/Runner/Runner.entitlements` looking like this:
 
@@ -157,10 +157,17 @@ two-minute answer to a problem that otherwise costs an evening.
 
 Captured on a physical Android device:
 
-|                                                                                                                        |                                                                                                                        |
-|------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
-| <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-1-home.jpeg" alt="Example home" width="400"/><br />The four SSID examples, with the interface harness at the bottom | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-2-ssid-helper.jpeg" alt="SSID resolved" width="400"/><br />`SSIDHelper` resolving a real network name |
-| <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-3-mixin.jpeg" alt="Mixin example" width="400"/><br />`SSIDResolverMixin` resolving automatically on load | |
+<img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-1-home.jpeg" alt="Example home" width="400"/>
+
+The four SSID examples, with the interface harness at the bottom
+
+<img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-2-ssid-helper.jpeg" alt="SSID resolved" width="400"/>
+
+`SSIDHelper` resolving a real network name
+
+<img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-3-mixin.jpeg" alt="Mixin example" width="400"/>
+
+`SSIDResolverMixin` resolving automatically on load
 
 ## Using the plugin, three ways
 
@@ -338,9 +345,13 @@ for (final i in await resolver.fetchNetworkInterfaces()) {
 
 Seen on a physical Android phone on a real `/20` network:
 
-|                                                                                                                        |                                                                                                                        |
-|------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
-| <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-4-interfaces.jpeg" alt="Interfaces" width="400"/><br />One address returned. The naive guess would have been `10.8.2.255` | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-5-udp-proof.jpeg" alt="UDP proof" width="400"/><br />Both sends succeed, including the wrong one. See below |
+<img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-4-interfaces.jpeg" alt="Interfaces" width="400"/>
+
+One address returned. The naive guess would have been `10.8.2.255`
+
+<img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-5-udp-proof.jpeg" alt="UDP proof" width="400"/>
+
+Both sends succeed, including the wrong one. See below
 
 The second screenshot is the whole point. A real UDP send to the correct broadcast `10.8.15.255`
 reports `sent OK`. A send to the naive `10.8.2.255` **also** reports `sent OK`. The socket accepts
