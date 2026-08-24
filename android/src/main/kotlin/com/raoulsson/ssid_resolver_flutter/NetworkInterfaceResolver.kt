@@ -127,6 +127,13 @@ class NetworkInterfaceResolver(private val context: Context? = null) {
         )
     }
 
+    // Expands a prefix length into a mask — the opposite direction from the iOS
+    // implementation, which counts the leading one bits of the mask the kernel
+    // reports. Two independent derivations agreeing on the same broadcast is a
+    // real cross-check. `Int.MIN_VALUE shr n` is an ARITHMETIC shift: it drags
+    // the sign bit along, which is exactly what builds a contiguous mask here.
+    // Signed 32-bit shift arithmetic is easy to get wrong at the high-bit
+    // prefixes, so this form was verified against a reference implementation.
     private fun prefixLengthToMask(prefixLength: Int): Int {
         return if (prefixLength <= 0) 0 else (Int.MIN_VALUE shr (prefixLength - 1))
     }

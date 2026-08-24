@@ -27,6 +27,12 @@ struct NetworkInterfaceInfo {
 // permission is required for this call, unlike SSID lookup - it must keep
 // working even when the user has denied Location.
 // Kept in lockstep with the copy in the standalone ssid-resolver-ios app.
+//
+// There is no escape hatch that would make this resolver unnecessary: sending
+// to the limited broadcast 255.255.255.255 came back EADDRNOTAVAIL on Darwin
+// when tried during this work, whether the socket was bound to 0.0.0.0 or to
+// the interface address. The directed broadcast derived below is the only
+// address that actually reaches the LAN from iOS.
 enum NetworkInterfaceResolver {
     static func fetchAll() -> [NetworkInterfaceInfo] {
         var results: [NetworkInterfaceInfo] = []

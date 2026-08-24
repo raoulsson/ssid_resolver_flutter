@@ -1,327 +1,77 @@
 # ssid_resolver_flutter - "Get my Wi-Fi Name"
 
-A flutter plugin to resolve the SSID of the connected wireless LAN, or simply: "Get my Wi-Fi Name".
+A Flutter plugin that resolves the SSID of the connected Wi-Fi network, or simply: "Get my Wi-Fi
+Name". Supports Android and iOS.
 
 [![Pub Version](https://img.shields.io/pub/v/ssid_resolver_flutter?style=flat-square)](https://pub.dev/packages/ssid_resolver_flutter)
 
-**Flutter UDP device discovery broken on your network? Your broadcast address is probably wrong.**
-Dart's `NetworkInterface` exposes no **netmask**, so nearly every Flutter app computes its UDP
-**broadcast address** as "first three octets + `.255`". That is correct only on a `/24` and silently
-wrong on `/20`, `/22`, `/16` - the subnets corporate, campus, guest and mesh networks hand out. The
-send succeeds, nothing throws, and the packet reaches nobody. This package returns the **real netmask
-and the correct broadcast address** on iOS and Android, with **no runtime permission** - nothing for
-the user to grant, and nothing to add on Android.
+Getting the SSID is mostly a permission problem, and that is what this README leads with: exactly
+what your app has to declare, in one place, copy-pasteable. Since 1.5.0 the plugin also reads the
+**real netmask** of every network interface and derives the correct **UDP broadcast address** from
+it - if Flutter device discovery has ever silently failed for you on an office or campus network,
+see [the netmask and the broadcast address](#the-netmask-and-the-broadcast-address) further down.
 
-> [!WARNING]
-> **The permissions live in YOUR app, not in this package.** A Flutter plugin cannot inject
-> `Info.plist` keys or entitlements. On **iOS** your app must declare
-> `NSLocationWhenInUseUsageDescription` and the Access WiFi Information capability for SSID
-> resolution, and `NSLocalNetworkUsageDescription` if you send UDP to the broadcast address - without
-> that last one the system prompt appears with no explanation at all. On **Android** you add nothing;
-> the plugin's manifest merges into yours.
-> See [What your app has to declare](#what-your-app-has-to-declare).
+## Quick start
 
-### Setup, in one paste
+Add the dependency:
 
-**Android:** nothing. Skip to the usage below.
+```yaml
+dependencies:
+  ssid_resolver_flutter: ^1.5.0
+```
 
-**iOS:** add to `ios/Runner/Info.plist`
+Then declare the permissions. They live in **your app**, not in this package - a Flutter plugin
+cannot inject `Info.plist` keys or entitlements into the app that uses it.
+
+### Android: nothing to add
+
+The plugin's own `AndroidManifest.xml` declares everything it needs, and Android's manifest merger
+folds it into your app automatically. For reference, this is what merges in:
+
+```xml
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+<uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+<uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+<queries>
+    <package android:name="com.google.android.gms" />
+    <package android:name="com.android.settings" />
+</queries>
+```
+
+Only the two location permissions are runtime permissions the user is prompted for; the plugin
+requests them for you. The rest are granted at install and never prompted.
+
+### iOS: three declarations
+
+**1. Usage strings** - add to `ios/Runner/Info.plist`:
 
 ```xml
 <key>NSLocationWhenInUseUsageDescription</key>
+<string>Used to read the name of the Wi-Fi network you are connected to.</string>
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 <string>Used to read the name of the Wi-Fi network you are connected to.</string>
 <key>NSLocalNetworkUsageDescription</key>
 <string>Used to find your devices on the local network.</string>
 ```
 
-and to `ios/Runner/Runner.entitlements` (only for SSID resolution, not for the netmask API)
-
-```xml
-<key>com.apple.developer.networking.wifi-info</key>
-<true/>
-```
-
-Then in Xcode add the **Access WiFi Information** capability to the Runner target, so the entitlement
-is provisioned. It is a standard capability on a paid Apple Developer team and takes a minute; a free
-personal team cannot provision it.
-
-**Usage:**
-
-```dart
-final resolver = SSIDResolver();
-
-// Correct broadcast addresses. No runtime permission, no setup, works on both platforms.
-for (final address in await resolver.broadcastAddresses()) {
-  socket.send(payload, InternetAddress(address), port);
-}
-
-// SSID. This is the part that needs everything above.
-final ssid = await resolver.resolveSSID();
-```
-
-Nothing in the netmask and broadcast API needs any of the iOS setup - it is only SSID resolution that
-does. If all you want is a correct broadcast address, add the package and call it.
-
-**When it does not work, run the example app.** Permission setup is the blocker with this kind of
-plugin, and the example exists to end the guessing: it lists **Granted Permissions** and **Denied
-Permissions** by name, and when a lookup fails it names exactly which one is missing rather than
-saying "failed". Run it on the device that is giving you trouble and compare its lists with yours -
-that is usually a two-minute answer to a problem that otherwise costs an evening. The screenshots
-below are that flow, end to end, on a physical phone.
-
-
-> [!WARNING]
-> SSID resolution (`resolveSSID()`) only works on **physical devices** — it is not supported on iOS Simulators or Android Emulators. The network interface API added in 1.5.0 (below) also works on simulators and emulators.
-
-> [!IMPORTANT]
-> **1.5.0 - the delta: device discovery now works on networks that are not `/24`.**
->
-> One caveat the summary above leaves out: this does **not** defeat client isolation or a separate
-> IoT VLAN - those are routing decisions no app can override. What it fixes is the case where the
-> devices are reachable and the broadcast address was simply pointing at nothing.
-> [The details, with the numbers](#the-netmask-problem-in-detail).
-
----
-
-> [!IMPORTANT]
-> **Version 1.4.0**: Added missing `ACCESS_NETWORK_STATE` permission, upgraded **Kotlin to 2.1.0**, and improved examples.
-
----
-
-> [!IMPORTANT]
-> **Version 1.3.0**: Fixed Android SSID resolution timeout on modern Android (API 29+) and fixed compatibility with newer Flutter versions.
-
----
-
-> [!TIP]
-> **TLDR**: Add the mixin class `SSIDResolverMixin` to your view and implement the `onSSIDChanged` method. This will trigger the permission request dialog if needed and resolve the SSID in one step.
-See below: [Using SSIDResolver Mixin](#1-using-ssidresolver-mixin).
-
----
-
-### Network interfaces, netmask and broadcast
-
-In plain words: it reads the subnet mask of every network interface from the OS and derives the
-directed broadcast address from it, instead of guessing.
-
-```dart
-final resolver = SSIDResolver();
-
-// Where to send UDP discovery: real LAN interfaces only, loopback, link-local,
-// VPN tunnels and cellular already filtered out.
-for (final address in await resolver.broadcastAddresses()) {
-  socket.send(payload, InternetAddress(address), port);
-}
-
-// Or the full picture, if you need to choose yourself.
-for (final i in await resolver.fetchNetworkInterfaces()) {
-  print('${i.name} ${i.ip}/${i.prefixLength} mask ${i.netmask} broadcast ${i.broadcast}');
-  // en0 10.8.2.76/20 mask 255.255.240.0 broadcast 10.8.15.255
-}
-```
-
-`NetworkInterfaceInfo` also exposes `isLoopback`, `isLinkLocal`, `isTunnel`, `isCellular` and
-`isUsableLan` so you can filter differently if `broadcastAddresses()` is not the split you want.
-Sending to a tunnel's broadcast address is worth avoiding specifically: the production code this
-package grew out of carries a comment warning that on iOS an unreachable broadcast can close the
-socket for the sends that follow it - inherited from that code, not re-measured here, but cheap to
-respect.
-
----
-
-Over the years, the number of permissions required to access the wireless network name has increased
-in both iOS and Android, and getting them right is the entire problem this plugin deals with: a set
-of static declarations in your app's config files, plus the user's consent to Location, which both
-systems tie to Wi-Fi identity.
-
-The contained example app: [debug_app.dart](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/lib/debug_app.dart) 
-is a perfect starting point, to figure out any permission issues you might have. It will show you exactly what you are missing.
-
-The example app in action is further down: [The example app, on a real phone](#the-example-app-on-a-real-phone).
-
-This plugin is based on my two standalone implementations for [iOS](https://github.com/raoulsson/ssid-resolver-ios)
-and [Android](https://github.com/raoulsson/ssid-resolver-android), both available on GitHub.
-
-### The example app, on a real phone
-
-Captured on a physical Android device on a `/20` network. This is the permission diagnostic
-described above: the app names every granted and denied permission, so you can see at a glance
-what your own app is missing. Run `example/` on a phone to reproduce it.
-
-|                                                                                                                        |                                                                                                                        |
-|------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
-| <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-1-home.jpeg" alt="Example home" width="400"/><br />The four SSID examples, with the 1.5.0 interface harness at the bottom | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-2-ssid-helper.jpeg" alt="SSID resolved" width="400"/><br />`SSIDHelper` resolving `ZH1082Guest` |
-| <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-3-mixin.jpeg" alt="Mixin example" width="400"/><br />`SSIDResolverMixin` auto-resolving on load | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-4-interfaces.jpeg" alt="Interfaces" width="400"/><br />`broadcastAddresses()` returns one address; the naive guess would have been `10.8.2.255` |
-| <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-5-udp-proof.jpeg" alt="UDP proof" width="400"/><br />**Both sends succeed** - see below | |
-
-**The last screenshot is the whole point.** A real UDP send to the correct broadcast `10.8.15.255`
-reports `sent OK`. A send to the naive `10.8.2.255` **also** reports `sent OK`. The socket accepts it,
-nothing throws, nothing logs - the packet simply leaves and reaches nobody, because on a `/20` that
-address belongs to no host. That is why this bug survives for years in a codebase: there is no error
-to find. Discovery quietly returns nothing and the network gets the blame.
-
-The interface list also shows why filtering is correctness rather than tidiness: `wlan0` is tagged
-USABLE LAN, `lo` loopback, and `rmnet_data9` cellular on a `/30`. Broadcasting to the cellular
-interface would push discovery traffic over mobile data to reach nothing at all.
-
-## The netmask problem in detail
-
-**What you could not do:** get a netmask. Dart's `NetworkInterface` gives you interface names and
-addresses and stops there. So code that needs a UDP broadcast address guesses it the only way
-available - take the first three octets, append `.255`. This is near-universal, and it is worth
-checking whatever you currently call for a broadcast address: the helper you are using very likely
-does exactly this internally.
-
-That guess is right on a `/24` and silently wrong on anything wider. On a `/20`, a host at `10.8.2.76` has
-its broadcast at `10.8.15.255`; the guessed `10.8.2.255` is an ordinary host address in the middle
-of the range, so the packet is unicast to a host that does not exist and dies. **No error, no
-exception, no log line** - discovery just finds nothing, which looks exactly like an empty network.
-There is no escape hatch either: the limited broadcast `255.255.255.255` came back `EADDRNOTAVAIL`
-on Darwin when tried during this work, bound to `0.0.0.0` and to the interface address alike.
-
-**What you can do now:** ask the OS. `fetchNetworkInterfaces()` returns every IPv4 interface with
-its real `netmask`, `prefixLength` and computed `broadcast` - `getifaddrs` on iOS,
-`java.net.NetworkInterface` on Android. `broadcastAddresses()` returns just the ones worth sending
-to.
-
-**The two platforms derive the answer in opposite directions**, and that is the best reason to trust
-the numbers: iOS counts the leading one bits of the mask the kernel reports, Android expands the
-kernel's prefix length into a mask. When an iPhone and an Android phone on the same `/20` print the
-same broadcast address, that is a real cross-check, not one implementation echoed twice. The
-arithmetic was also checked on both platforms against an independent reference implementation during
-development, including the high-bit prefixes where signed 32-bit shifts go wrong.
-
-- **No runtime permission - nothing for the user to grant.** SSID resolution needs Location; when it
-  is denied, `resolveSSID()` throws and the mixin reports `"Unknown"`. Reading the interface table
-  has no such gate on either platform (Android's install-time `ACCESS_NETWORK_STATE`, covered below,
-  is the one declaration involved), so it keeps working on a device where Location is denied - and
-  on simulators and emulators, unlike `resolveSSID()`.
-- **Every interface, not only Wi-Fi**: ethernet, tunnels and cellular, which is what makes correct
-  filtering possible rather than accidental.
-- **Cellular is excluded from `broadcastAddresses()` deliberately.** iOS cellular carries a `/32`,
-  where the derived broadcast equals the interface's own address; Android cellular sits on a tiny
-  point-to-point subnet - a `/30` in the screenshot above. Either way the derived address reaches no
-  discovery target. Unfiltered, the list would send discovery over mobile data into nothing - the
-  same silent hole, one interface over.
-
-## What your app has to declare
-
-The netmask and broadcast API needs **no runtime permission** on either platform - nothing is prompted
-and nothing can be denied. What it does need differs by platform, and only one side asks anything of
-you:
-
-**Android: nothing.** The plugin's own `AndroidManifest.xml` declares `ACCESS_NETWORK_STATE` (and the
-Wi-Fi and location permissions used by SSID resolution), and Android's manifest merger folds them into
-your app automatically. `ACCESS_NETWORK_STATE` is a normal permission - granted at install, never
-prompted - and it is what `ConnectivityManager` requires on devices where
-`NetworkInterface.getNetworkInterfaces()` returns null.
-
-**iOS: you must add these yourself.** A plugin cannot inject `Info.plist` keys or entitlements, so
-these live in your app or nothing works:
-
-| What | Needed for |
-|---|---|
-| `NSLocationWhenInUseUsageDescription` | SSID resolution (iOS ties Wi-Fi identity to Location) |
-| Access WiFi Information capability | SSID resolution - a standard capability on a paid team |
-| `NSLocalNetworkUsageDescription` | **only if you send UDP on the LAN**, which is the point of the broadcast address |
-
-`fetchNetworkInterfaces()` and `broadcastAddresses()` need none of the three: reading the interface
-table is not privileged on either platform, which is why the list still works on a device where the
-user denied everything and the SSID cannot be resolved at all. The moment you *send* to one of those
-addresses on iOS, the system shows the Local Network prompt - without
-`NSLocalNetworkUsageDescription` it appears with no explanation, which App Review notices.
-
-## Fixed in 1.5.0
-
-Found by running the example app on physical phones, not by reading the code.
-
-- **Android: the interface list was always empty on modern devices.**
-  `NetworkInterface.getNetworkInterfaces()` returns `null` on Android builds where the Android 11
-  `/proc/net` restrictions apply - observed on a Samsung running Android 15, where it returns null
-  rather than throwing. `Collections.list(null)` then throws `NullPointerException`, which was caught
-  and turned into an empty list, so a crash on every call looked like "this device has no network
-  interfaces". `ConnectivityManager`/`LinkProperties` is now the fallback and reports the prefix
-  length directly.
-- **iOS: a failed SSID lookup blamed the wrong thing.** `NEHotspotNetwork.fetchCurrent()` returning
-  `nil` was reported as a missing Access WiFi Information entitlement. It returns `nil` for at least
-  three reasons - no entitlement, no Wi-Fi connection, or a network that withholds its name, which
-  captive portals, enterprise and guest networks do - so on a guest network it sent you looking for an
-  entitlement you already had. The pre-flight "entitlement check" was itself a `fetchCurrent()` call,
-  so it could only ever reach that one conclusion; it is gone rather than patched.
-
-**Behaviour change worth knowing:** a failed iOS lookup now reports its real cause. What a Dart
-caller catches is unchanged - an `Exception` whose message carries the native error text - but the
-text itself is different: where every failure used to claim a missing WiFi permission, a lookup with
-no Wi-Fi connection or on a network that withholds its name now says so. If you match on the message
-string, adjust; the exception type stays the same.
-
-## Android SSID Resolution
-
-On Android, the plugin resolves the SSID using a three-tier approach:
-1. **`NetworkCapabilities.transportInfo`** (API 29+) — synchronous, instant result
-2. **`WifiManager.connectionInfo`** — fallback for older devices
-3. **Async `registerNetworkCallback`** — last resort with 5-second timeout
-
-The plugin does **not** use `WifiManager.startScan()`, which is deprecated and throttled/broken on modern Android.
-
-# Usage and Configuration
-
-Note on failure behaviour, because the layers differ. `resolveSSID()` throws an `Exception` whose
-message names the cause when permission is missing (both platforms) or when the iOS lookup fails for
-another reason; on Android a lookup that runs with permission granted but cannot get a name resolves
-to the string `"Unknown"`. The convenience layers absorb the exception case: `SSIDResolverMixin`
-reports `"Unknown"` through `onSSIDChanged` when permission is denied, and `SSIDHelper.getSSID()`
-returns `null` then.
-
-## SSID Resolution Flow
-
-The SSID resolver provides three key methods:
-
-- `resolveSSID()`: Returns the connected WiFi SSID; throws with the cause in the message when
-  permission is missing, and on Android reports `"Unknown"` when a permitted lookup gets no name
-- `checkPermissionStatus()`: Verifies required permissions
-- `requestPermission()`: Handles permission requests
-
-### Typical Usage Flow
-1. Check permission status
-2. Request permissions if needed
-3. Resolve SSID
-
-Note: On iOS, WiFi access requires location permissions, even with the Xcode WiFi capability configured.
-
-# Usage
-
-The plugin is available on [pub.dev](https://pub.dev/packages/ssid_resolver_flutter). To use the plugin 
-in your project, add `ssid_resolver_flutter` as a dependency in your pubspec.yaml file:
-
-```yaml
-  ssid_resolver_flutter: ^x.y.z
-```
-
-In the folder [example/lib](https://github.com/raoulsson/ssid_resolver_flutter/tree/master/example/lib) you can 
-find example apps that use this plugin, see below for a more detailed discussion. The important configuration 
-parts for iOS and Android are listed below.
-
-## iOS Permission Configuration
-
-Needs these permissions in the `Info.plist` file:
-
-```xml
-<key>NSLocationWhenInUseUsageDescription</key>
-<string>This app needs access to location to determine the WiFi information.</string>
-<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string>This app needs access to location to determine the WiFi information.</string>
-```
-
-The `com.apple.developer.networking.wifi-info` entitlement belongs in `Runner.entitlements`, not in
-`Info.plist` - Xcode writes it there for you: open `<project_root>/ios/Runner/Runner.xcodeproj` in
-Xcode, go to "Signing & Capabilities" and add the "Access WiFi Information" capability.
+`NSLocalNetworkUsageDescription` is only needed if your app **sends** UDP on the local network -
+which is the point of the broadcast API below. Without it the system's Local Network prompt appears
+with no explanation at all, which App Review notices.
+
+**2. The entitlement** - the `com.apple.developer.networking.wifi-info` key belongs in
+`ios/Runner/Runner.entitlements`, and Xcode writes it there for you:
+
+**3. The capability** - open `ios/Runner/Runner.xcodeproj` in Xcode, go to
+"Signing & Capabilities" on the Runner target and add **Access WiFi Information**:
 
 | Add WiFi Capability 1                                                                                                                                        | Add WiFi Capability 2                                                                                                                                        |
 |--------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/add-wifi-capability-1.png" alt="Add WiFi Capability 1" width="400"/> | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/add-wifi-capability-2.png" alt="Add WiFi Capability 2" width="400"/> |      
+| <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/add-wifi-capability-1.png" alt="Add WiFi Capability 1" width="400"/> | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/add-wifi-capability-2.png" alt="Add WiFi Capability 2" width="400"/> |
 
-This should produce the file `<project_root>/ios/Runner/Runner.entitlements` with this content:
+This should leave `ios/Runner/Runner.entitlements` looking like this:
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -334,149 +84,140 @@ This should produce the file `<project_root>/ios/Runner/Runner.entitlements` wit
 </plist>
 ```
 
-## Android Permission Configuration
+The capability is standard on a paid Apple Developer team and takes a minute; a free personal team
+cannot provision it. Note that iOS ties Wi-Fi identity to Location, so the user must also grant the
+Location prompt at runtime - the capability alone is not enough.
 
-For Android, the `AndroidManifest.xml` file needs these permissions: 
+### The three iOS gates, told apart
 
-```xml
-<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-<uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-<uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-```
+iOS has three separate gates in this area, and they are constantly confused - what looks like one
+"network permission" is three different mechanisms with three different owners:
 
-And also the following queries:
+| Gate | What it unlocks | How you get it |
+|---|---|---|
+| `NSLocationWhenInUseUsageDescription` + the **Access WiFi Information** capability | Reading the SSID | Self-serve in Xcode, as shown above. A paid Apple Developer team provisions the capability in about a minute; a free personal team cannot. |
+| `NSLocalNetworkUsageDescription` | Sending on the local network - it supplies the text for the "find devices on your local network" prompt | Add the key to your `Info.plist`. Without it the prompt still appears, with no explanation text, which App Review notices. |
+| **Multicast Networking Entitlement** (`com.apple.developer.networking.multicast`) | Multicast and broadcast networking, as Apple documents it | A request to Apple describing your use case; allow about a week. |
 
-```xml
-<queries>
-    <package android:name="com.google.android.gms" />
-    <package android:name="com.android.settings" />
-</queries>
-```
+The third one deserves a correction, because it is usually framed wrong: it is **not** a
+paid-versus-personal tier question. Apple reviews the **intent**. You submit a request describing
+what your app does on the network, and Apple decides whether that is something legitimate - finding
+and controlling your own devices on the user's own network - or something they do not want, like
+sweeping a network to harvest data about other people's devices. If your use is the former, a
+single independent developer gets it approved too. "Apple wants to know why", not "you need a
+company".
 
-# Examples
+Do you need it for the broadcast API below? Observed: on a physical iPhone 14 (iOS 26.6), the
+example app sent UDP to a directed broadcast (`10.8.15.255`) and reported `sent OK` with only
+`NSLocalNetworkUsageDescription` in play and no multicast entitlement. At the same time, Apple
+documents the entitlement as required for multicast and broadcast, and App Review may require it
+for an app whose whole purpose is local device discovery - so an app built around discovery should
+expect to request it, even though a plain directed broadcast worked without it in our testing.
 
-All examples are available in the [example/lib](https://github.com/raoulsson/ssid_resolver_flutter/tree/master/example/lib) folder. 
-Use the [debug_app.dart](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/lib/debug_app.dart)
-to fix your permissions issues. The example app demonstrates the usage of the plugin in a simple way, 
-showing all the granted and missing permissions. 
+The example app's own config files are a working reference:
+[AndroidManifest.xml](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/android/app/src/main/AndroidManifest.xml),
+[Info.plist](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/ios/Runner/Info.plist),
+[Runner.entitlements](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/ios/Runner/Runner.entitlements).
 
-Note that only the location permissions need user consent and the other ones have to be granted in the 
-`AndroidManifest.xml` for Android, and `Info.plist` and `Runner.entitlements` files in the case of iOS, 
-as mentioned above. It's important to note that the permissions are given by the client code of this 
-plugin, not the plugin itself. 
+### Resolve the SSID
 
-Just follow the examples and the permission files of the "example app", 
-[here for Android](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/android/app/src/main/AndroidManifest.xml)
-and [here](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/ios/Runner/Info.plist) 
-and [here for iOS](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/ios/Runner/Runner.entitlements).
-
-## 1. Using SSIDResolver Mixin
-
-Add the mixin class `SSIDResolverMixin` to your view and implement the `onSSIDChanged` method.
+The shortest path is the mixin: add `SSIDResolverMixin` to your state class and implement
+`onSSIDChanged`. It triggers the permission request dialog if needed and resolves the SSID in one
+step.
 
 ```dart
-  class _SSIDMixinExampleState extends State<SSIDMixinExample> with SSIDResolverMixin<SSIDMixinExample> {
-        ...
-        @override
-        void onSSIDChanged(String ssid) {
-          ...
-        }
-        ...
+class _SSIDMixinExampleState extends State<SSIDMixinExample>
+    with SSIDResolverMixin<SSIDMixinExample> {
+  String _ssid = '';
+
+  @override
+  void onSSIDChanged(String ssid) {
+    setState(() => _ssid = ssid);
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(child: Text(_ssid));
+  }
+}
 ```
 
-This will trigger the permission request dialog if needed and resolve the SSID in one step.
+Run it on a **physical device**: SSID resolution is not supported on iOS Simulators or Android
+Emulators. (The network interface API further down works on simulators and emulators too.)
 
-Here is the full client code that takes full advantage of the plugin for Wi-Fi SSID resolution:
+## When it does not work
+
+Permission setup is the blocker with this kind of plugin, and the example app exists to end the
+guessing: it lists **Granted Permissions** and **Denied Permissions** by name, and when a lookup
+fails it names exactly which one is missing rather than saying "failed". Run
+[debug_app.dart](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/lib/debug_app.dart)
+from [example/lib](https://github.com/raoulsson/ssid_resolver_flutter/tree/master/example/lib) on
+the device that is giving you trouble and compare its lists with yours - that is usually a
+two-minute answer to a problem that otherwise costs an evening.
+
+Captured on a physical Android device:
+
+|                                                                                                                        |                                                                                                                        |
+|------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
+| <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-1-home.jpeg" alt="Example home" width="400"/><br />The four SSID examples, with the 1.5.0 interface harness at the bottom | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-2-ssid-helper.jpeg" alt="SSID resolved" width="400"/><br />`SSIDHelper` resolving `ZH1082Guest` |
+| <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-3-mixin.jpeg" alt="Mixin example" width="400"/><br />`SSIDResolverMixin` auto-resolving on load | |
+
+## Using the plugin, three ways
+
+`SSIDResolver` provides three key methods - `resolveSSID()`, `checkPermissionStatus()` and
+`requestPermission()` - and two convenience layers on top. Failure behaviour differs by layer, so
+here it is once: `resolveSSID()` throws an `Exception` whose message names the cause when
+permission is missing (both platforms) or when the iOS lookup fails for another reason; on Android
+a lookup that runs with permission granted but cannot get a name resolves to the string
+`"Unknown"`. The convenience layers absorb the exception case: `SSIDResolverMixin` reports
+`"Unknown"` through `onSSIDChanged` when permission is denied, and `SSIDHelper.getSSID()` returns
+`null` then.
+
+### 1. SSIDResolverMixin
+
+The one-step approach shown in the quick start: mix in `SSIDResolverMixin`, implement
+`onSSIDChanged`, done. Full source:
+[ssidresolver_mixin_example.dart](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/lib/ssidresolver_mixin_example.dart).
+
+### 2. SSIDHelper
+
+The location permission only has to be granted once in your app's lifetime, so if other screens
+appear before you need the SSID, let `SSIDHelper` handle the request early. This spares you the
+"re-entry" handling after the OS hands control back from its permission dialog.
+
+At app startup:
 
 ```dart
-    class SSIDMixinExample extends StatefulWidget {
-      const SSIDMixinExample({super.key});
-      @override
-      State<SSIDMixinExample> createState() => _SSIDMixinExampleState();
-    }
-    
-    class _SSIDMixinExampleState extends State<SSIDMixinExample> with SSIDResolverMixin<SSIDMixinExample> {
-      String _ssid = '';
-    
-      @override
-      void onSSIDChanged(String ssid) {
-        setState(() => 
-          _ssid = ssid
-        );
-      }
-    
-      @override
-      Widget build(BuildContext context) {
-        return Center(
-          child: Text(_ssid),
-        );
-      }
-    }
+final _ssidHelper = SSIDHelper();
+
+@override
+void initState() {
+  super.initState();
+  _ssidHelper.initialize(); // triggers the permission dialog if needed
+}
 ```
 
-The source code is here: [ssidresolver_mixin_example.dart](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/lib/ssidresolver_mixin_example.dart).
-If you need more fine-grained control, on when the SSID is resolved or when the permission dialog should 
-be shown, look below at the "Do It Yourself" example.
-
-## 2. Using SSIDHelper
-
-Once the user gives the "location permission", the SSID can be resolved. And because the "location 
-permission" step only has to happen once in your app's lifetime, why bother and make things complicated?
-If there are other screens that appear in your app before you trigger the SSID resolution, you can 
-use the `SSIDHelper` class to do the initialization and permission request way before you actually 
-need the SSID.
-
-This greatly simplifies the flow of your app, as you don't need to handle the "re-entry" event, after 
-the phone operating system is handing you back the control and the result of the permission dialog.
-
-Use the `SSIDHelper` class to do the initialization and permission request (or do the same that it 
-does internally) after your app starts up. The call to `_ssidHelper.initialize()` will trigger the 
-permission request dialog if needed.
-
-On subsequent screens, you can then call `getSSID()` to get the SSID without having to worry about 
-the permission dialog.
+Don't forget `_ssidHelper.dispose();` in your `dispose` method. Later, on the screen that needs
+the SSID:
 
 ```dart
-    final _ssidHelper = SSIDHelper();
-    
-    @override
-    void initState() {
-      super.initState();
-      _ssidHelper.initialize();
-    }
+Future<void> _resolveSSID() async {
+  final ssid = await _ssidHelper.getSSID();
+  setState(() => _ssid = ssid ?? 'Permission missing');
+}
 ```
 
-Don't forget to call `_ssidHelper.dispose();` in your `dispose` method.
+`getSSID()` returns `Future<String?>` and yields `null` while the permission is missing, so decide
+what your UI shows for that case. Both steps combined:
+[ssidhelper_example.dart](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/lib/ssidhelper_example.dart) -
+you will notice the SSID only resolves after you click the button for the second time.
 
-Now, on the screen where you need the SSID, you can simply call `_ssidHelper.getSSID()`. It returns
-`Future<String?>` and yields `null` while the permission is missing, so decide what your UI shows
-for that case:
+### 3. "Do It Yourself"
 
-```dart
-    Future<void> _resolveSSID() async {
-      final ssid = await _ssidHelper.getSSID();
-      setState(() => _ssid = ssid ?? 'Permission missing');
-    }
-```
-
-These two steps are combined in the example app: [ssidhelper_example.dart](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/lib/ssidhelper_example.dart).
-You will notice that the SSID only resolves after you click the button for the second time.
-
-## 3. "Do It Yourself"
-
-This example shows how to use the plugin "hands-on". To get the permissions, the OS opens its own 
-modal dialog and later returns to the app. If you need full control over the process, you therefore need
-to use the `WidgetsBindingObserver`, register your class as an observer and implement the `didChangeAppLifecycleState` method.
-Have a look at the "Do It Yourself" implementation that can be found in the example app folder 
-here: [do_it_yourself_example.dart](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/lib/do_it_yourself_example.dart).
-
-Below is part of the source code. In the case permissions are not yet granted, the OS will 
-take over and show the permission dialog. Thus, when the app is resumed, the observer will check 
-the permission status and continue the flow.
+For full control over when the permission dialog appears and when the SSID resolves. The OS opens
+its own modal dialog and later returns to the app, so you register a `WidgetsBindingObserver` and
+continue the flow in `didChangeAppLifecycleState`. Full source:
+[do_it_yourself_example.dart](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/lib/do_it_yourself_example.dart).
 
 ```dart
 class _DIYExampleState extends State<DIYExample> with WidgetsBindingObserver {
@@ -543,43 +284,132 @@ class _DIYExampleState extends State<DIYExample> with WidgetsBindingObserver {
           (_) => _checkPermissionAndContinue(),
     );
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-          ...
-          // SSID Result Display
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFE0E0E0),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              _ssid,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Color(0xFF142467),
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          ...
-    );
-  }
+  // build() omitted - see the linked example.
 }
 ```
 
-# Troubleshooting
+### How Android resolves the SSID
 
-If you run into permissions issues, make sure to check the permissions in the `AndroidManifest.xml` 
-and `Info.plist` files as described above and try running the app on a real device instead of the emulator. 
-iOS will not give you an SSID on the simulator. 
+Three tiers, tried in order:
 
-Also run the example app: [debug_app.dart](https://github.com/raoulsson/ssid_resolver_flutter/blob/master/example/lib/debug_app.dart) and check the output. 
-That should show which permissions are missing.
+1. **`NetworkCapabilities.transportInfo`** (API 29+) - synchronous, instant result
+2. **`WifiManager.connectionInfo`** - fallback for older devices
+3. **Async `registerNetworkCallback`** - last resort with 5-second timeout
+
+The plugin does **not** use `WifiManager.startScan()`, which is deprecated and throttled/broken on
+modern Android.
+
+## The netmask and the broadcast address
+
+While building the SSID part, a related thing turned out to be quietly broken almost everywhere,
+and 1.5.0 solves it too.
+
+**The problem:** Dart's `NetworkInterface` gives you interface names and addresses and stops there -
+no netmask. So Flutter code that needs a UDP broadcast address for device discovery guesses it the
+only way available: take the first three octets, append `.255`. This is near-universal, and it is
+worth checking whatever helper you currently call for a broadcast address - it very likely does
+exactly this internally. The guess is right on a `/24` and silently wrong on anything **wider** -
+the `/20`, `/22`, `/16` that corporate, campus, guest and mesh networks hand out. On a `/20`, a
+host at `10.8.2.76` has its broadcast at `10.8.15.255`; the guessed `10.8.2.255` is an ordinary
+host address in the middle of the range, so the packet is unicast to a host that does not exist and
+dies. **No error, no exception, no log line** - discovery just finds nothing, which looks exactly
+like an empty network. That is why this bug survives for years in a codebase, and the network gets
+the blame.
+
+**The fix:** ask the OS. The plugin reads the real netmask of every IPv4 interface - `getifaddrs`
+on iOS, `java.net.NetworkInterface` with a `ConnectivityManager` fallback on Android - and derives
+the directed broadcast address from it, instead of guessing.
+
+```dart
+final resolver = SSIDResolver();
+
+// Where to send UDP discovery: real LAN interfaces only - loopback, link-local,
+// VPN tunnels and cellular already filtered out.
+for (final address in await resolver.broadcastAddresses()) {
+  socket.send(payload, InternetAddress(address), port);
+}
+
+// Or the full picture, if you need to choose yourself.
+for (final i in await resolver.fetchNetworkInterfaces()) {
+  print('${i.name} ${i.ip}/${i.prefixLength} mask ${i.netmask} broadcast ${i.broadcast}');
+  // en0 10.8.2.76/20 mask 255.255.240.0 broadcast 10.8.15.255
+}
+```
+
+Seen on a physical Android phone on a real `/20` network:
+
+|                                                                                                                        |                                                                                                                        |
+|------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|
+| <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-4-interfaces.jpeg" alt="Interfaces" width="400"/><br />`broadcastAddresses()` returns one address; the naive guess would have been `10.8.2.255` | <img src="https://raw.githubusercontent.com/raoulsson/ssid_resolver_flutter/master/res/example-5-udp-proof.jpeg" alt="UDP proof" width="400"/><br />**Both sends succeed** - see below |
+
+The second screenshot is the whole point. A real UDP send to the correct broadcast `10.8.15.255`
+reports `sent OK`. A send to the naive `10.8.2.255` **also** reports `sent OK`. The socket accepts
+it, nothing throws, nothing logs - the packet simply leaves and reaches nobody, because on a `/20`
+that address belongs to no host. There is no error to find.
+
+Worth knowing, in decreasing order of surprise:
+
+- **No runtime permission - nothing for the user to grant, nothing for you to add.** Reading the
+  interface table has no runtime gate on either platform: Android needs `ACCESS_NETWORK_STATE` in
+  the manifest, which is granted at install, never prompted, and merges in from the plugin
+  automatically; iOS needs nothing - no entitlement, no capability. So the list keeps working on a
+  device where Location is denied and the SSID cannot be resolved at all - and on simulators and
+  emulators, unlike `resolveSSID()`. The one iOS declaration that becomes relevant is
+  `NSLocalNetworkUsageDescription`, and only at the moment your app *sends* to one of those
+  addresses - see [the three iOS gates](#the-three-ios-gates-told-apart) for that, and for where
+  the multicast entitlement fits in.
+- **Every interface, not only Wi-Fi**: ethernet, tunnels and cellular, which is what makes correct
+  filtering possible rather than accidental. `NetworkInterfaceInfo` exposes `isLoopback`,
+  `isLinkLocal`, `isTunnel`, `isCellular` and `isUsableLan` so you can filter differently if
+  `broadcastAddresses()` is not the split you want.
+- **Cellular is excluded from `broadcastAddresses()` deliberately.** iOS cellular carries a `/32`,
+  where the derived broadcast equals the interface's own address; Android cellular sits on a tiny
+  point-to-point subnet - a `/30` in the screenshot above (`rmnet_data9`). Either way the derived
+  address reaches no discovery target; unfiltered, discovery traffic would go out over mobile data
+  into nothing. Tunnels are excluded too - the production code this package grew out of carries a
+  warning that on iOS an unreachable broadcast can close the socket for the sends that follow it.
+- **The two platforms derive the answer in opposite directions**, and that is the best reason to
+  trust the numbers: iOS counts the leading one bits of the mask the kernel reports, Android
+  expands the kernel's prefix length into a mask. When an iPhone and an Android phone on the same
+  `/20` print the same broadcast address, that is a real cross-check, not one implementation echoed
+  twice. The arithmetic was also checked on both platforms against an independent reference
+  implementation, including the high-bit prefixes where signed 32-bit shifts go wrong.
+
+One honest caveat: this does **not** defeat client isolation or a separate IoT VLAN - those are
+routing decisions no app can override. What it fixes is the case where the devices are reachable
+and the broadcast address was simply pointing at nothing.
+
+## What changed recently
+
+**1.5.0** - the network interface API above, plus two fixes found by running the example app on
+physical phones:
+
+- **Android: the interface list was always empty on modern devices.**
+  `NetworkInterface.getNetworkInterfaces()` returns `null` on Android builds where the Android 11
+  `/proc/net` restrictions apply - observed on a Samsung running Android 15. `Collections.list(null)`
+  then threw a `NullPointerException` that was caught and turned into an empty list, so a crash on
+  every call looked like "this device has no network interfaces".
+  `ConnectivityManager`/`LinkProperties` is now the fallback and reports the prefix length directly.
+- **iOS: a failed SSID lookup blamed the wrong thing.** `NEHotspotNetwork.fetchCurrent()` returning
+  `nil` was always reported as a missing Access WiFi Information entitlement, but it also returns
+  `nil` with no Wi-Fi connection or on a network that withholds its name - which captive portals,
+  enterprise and guest networks do. A failed lookup now reports its real cause. If you match on the
+  exception's message string, adjust; the exception type is unchanged.
+
+**1.4.0** - added the missing `ACCESS_NETWORK_STATE` permission, upgraded Kotlin to 2.1.0, improved
+examples.
+
+**1.3.0** - fixed the Android SSID resolution timeout on modern Android (API 29+) and compatibility
+with newer Flutter versions.
+
+## Related repositories
+
+This plugin is based on my two standalone implementations, both on GitHub:
+[ssid-resolver-ios](https://github.com/raoulsson/ssid-resolver-ios) and
+[ssid-resolver-android](https://github.com/raoulsson/ssid-resolver-android). They are the native
+proving grounds: if a value is right in the native app and wrong here, the fault is in the Dart
+layer. `NetworkInterfaceResolver` is kept in lockstep between the repos; the SSID resolver classes
+share their approach but have diverged in the details.
 
 # License
 

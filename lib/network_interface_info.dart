@@ -44,8 +44,11 @@ class NetworkInterfaceInfo {
 
   /// True for cellular data interfaces: `pdp_ip*` on iOS; `rmnet*`, `ccmni*`,
   /// `radio*` and vendor variants on Android; `clat*` for 464XLAT over cellular.
-  /// These often carry a /32, whose computed broadcast is the interface's own
-  /// address — a UDP send there goes out over mobile data and reaches nothing.
+  /// iOS cellular carries a /32, whose computed broadcast is the interface's
+  /// own address; Android cellular was observed on a /30, a point-to-point
+  /// subnet with no discovery targets on it (never assume /32 universally).
+  /// Either way, a UDP send to the derived broadcast goes out over mobile data
+  /// and reaches nothing — which is why [isUsableLan] excludes cellular.
   bool get isCellular =>
       name.startsWith('pdp_ip') ||
       name.startsWith('rmnet') ||

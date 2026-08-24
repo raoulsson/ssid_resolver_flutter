@@ -1,3 +1,11 @@
+## 1.5.1
+
+* Documentation only, no code change. The README was rewritten around the question people actually
+  arrive with - how do I read the SSID, and what permissions does that need - with the netmask and
+  broadcast-address work as the secondary topic it is. The previous version made the same argument
+  about `.255` guessing four times before telling anyone how to use the package.
+* Deeper detail that belonged next to the code rather than in a README moved into source comments.
+
 ## 1.5.0
 
 * **Network interface info**: `fetchNetworkInterfaces()` returns every IPv4 interface with its `name`,

@@ -1,7 +1,7 @@
 name: ssid_resolver_flutter
 description: "Resolve the SSID of the connected WiFi network, plus per-interface IPv4 netmask and true broadcast address - the netmask Dart's NetworkInterface does not give you."
 
-version: 1.5.0
+version: 1.5.1
 
 homepage: https://github.com/raoulsson/ssid_resolver_flutter
 
