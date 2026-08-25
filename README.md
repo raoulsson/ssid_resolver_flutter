@@ -386,7 +386,7 @@ Worth knowing, in decreasing order of surprise:
   twice. The arithmetic was also checked on both platforms against an independent reference
   implementation, including the high-bit prefixes where signed 32-bit shifts go wrong.
 
-One honest caveat: this does **not** defeat client isolation or a separate IoT VLAN - those are
+One caveat: this does **not** defeat client isolation or a separate IoT VLAN - those are
 routing decisions no app can override. What it fixes is the case where the devices are reachable
 and the broadcast address was simply pointing at nothing.
 

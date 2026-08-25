@@ -98,7 +98,7 @@ class CoreSSIDResolver: NSObject, CLLocationManagerDelegate {
 
         // No pre-flight entitlement probe: the probe was itself a fetchCurrent
         // call, so it could only ever report "nil" as "missing entitlement".
-        // Attempt the real fetch, then explain a nil result honestly.
+        // Attempt the real fetch, then say which of the three causes a nil result was.
         NEHotspotNetwork.fetchCurrent { network in
             if let ssid = network?.ssid, !ssid.isEmpty {
                 completion(ssid, nil)
