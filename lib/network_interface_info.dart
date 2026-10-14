@@ -40,7 +40,10 @@ class NetworkInterfaceInfo {
   /// True for interfaces that are typically VPN tunnels rather than the LAN the
   /// user's devices are on. Broadcasting into these is what closes iOS sockets.
   bool get isTunnel =>
-      name.startsWith('utun') || name.startsWith('tun') || name.startsWith('ppp') || name.startsWith('ipsec');
+      name.startsWith('utun') ||
+      name.startsWith('tun') ||
+      name.startsWith('ppp') ||
+      name.startsWith('ipsec');
 
   /// True for cellular data interfaces: `pdp_ip*` on iOS; `rmnet*`, `ccmni*`,
   /// `radio*` and vendor variants on Android; `clat*` for 464XLAT over cellular.
@@ -58,7 +61,8 @@ class NetworkInterfaceInfo {
 
   /// The interfaces worth broadcasting on: a real LAN, not loopback, not a
   /// self-assigned address, not a tunnel, not cellular.
-  bool get isUsableLan => !isLoopback && !isLinkLocal && !isTunnel && !isCellular;
+  bool get isUsableLan =>
+      !isLoopback && !isLinkLocal && !isTunnel && !isCellular;
 
   factory NetworkInterfaceInfo.fromMap(Map<Object?, Object?> map) {
     return NetworkInterfaceInfo(
@@ -83,11 +87,15 @@ class NetworkInterfaceInfo {
       };
 
   @override
-  String toString() => 'NetworkInterfaceInfo($name, ip: $ip, netmask: $netmask, broadcast: $broadcast, /$prefixLength)';
+  String toString() =>
+      'NetworkInterfaceInfo($name, ip: $ip, netmask: $netmask, broadcast: $broadcast, /$prefixLength)';
 
   @override
   bool operator ==(Object other) =>
-      other is NetworkInterfaceInfo && other.name == name && other.ip == ip && other.netmask == netmask;
+      other is NetworkInterfaceInfo &&
+      other.name == name &&
+      other.ip == ip &&
+      other.netmask == netmask;
 
   @override
   int get hashCode => Object.hash(name, ip, netmask);

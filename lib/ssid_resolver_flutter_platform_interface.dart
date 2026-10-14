@@ -45,6 +45,7 @@ abstract class SsidResolverFlutterPlatform extends PlatformInterface {
   /// iOS, java.net.NetworkInterface on Android), not the WiFi identity that
   /// [resolveSSID] needs Location for.
   Future<List<NetworkInterfaceInfo>> fetchNetworkInterfaces() {
-    throw UnimplementedError('fetchNetworkInterfaces() has not been implemented.');
+    throw UnimplementedError(
+        'fetchNetworkInterfaces() has not been implemented.');
   }
 }

@@ -55,67 +55,66 @@ class _SSIDHelperExampleState extends State<SSIDHelperExample> {
         foregroundColor: Colors.white,
       ),
 
-        backgroundColor: const Color(0xFF142467),
-        bottomNavigationBar: const SimulatorWarning(),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Title
-                  Center(
-                    child: Text(
-                      'SSID Resolver Simple',
-                      style: TextStyle(
-                        color: const Color(0xFFFFA500),
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                      ),
+      backgroundColor: const Color(0xFF142467),
+      bottomNavigationBar: const SimulatorWarning(),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Title
+                Center(
+                  child: Text(
+                    'SSID Resolver Simple',
+                    style: TextStyle(
+                      color: const Color(0xFFFFA500),
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
+                ),
 
-                  const SizedBox(height: 22),
+                const SizedBox(height: 22),
 
-                  // SSID Result Display
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE0E0E0),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      _ssid,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Color(0xFF142467),
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                      ),
+                // SSID Result Display
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE0E0E0),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    _ssid,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Color(0xFF142467),
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
+                ),
 
-                  const SizedBox(height: 22),
+                const SizedBox(height: 22),
 
-                  // Request Permissions Button
-                  ElevatedButton(
-                    onPressed: _resolveSSID,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFFA500),
-                      foregroundColor: Colors.black,
-                      textStyle: const TextStyle(
-                          fontSize: 24, fontWeight: FontWeight.bold),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: const Text('Resolve SSID'),
+                // Request Permissions Button
+                ElevatedButton(
+                  onPressed: _resolveSSID,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFFA500),
+                    foregroundColor: Colors.black,
+                    textStyle: const TextStyle(
+                        fontSize: 24, fontWeight: FontWeight.bold),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
-                ],
-              ),
+                  child: const Text('Resolve SSID'),
+                ),
+              ],
             ),
           ),
         ),
-
+      ),
     );
   }
 }

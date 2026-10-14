@@ -20,8 +20,7 @@ class DIYExample extends StatefulWidget {
   State<DIYExample> createState() => _DIYExampleState();
 }
 
-class _DIYExampleState extends State<DIYExample>
-    with WidgetsBindingObserver {
+class _DIYExampleState extends State<DIYExample> with WidgetsBindingObserver {
   final _ssidResolver = SSIDResolver();
   String _ssid = '';
   bool _isRequestingPermission = false;
@@ -97,67 +96,66 @@ class _DIYExampleState extends State<DIYExample>
         foregroundColor: Colors.white,
       ),
 
-        backgroundColor: const Color(0xFF142467),
-        bottomNavigationBar: const SimulatorWarning(),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Title
-                  Center(
-                    child: Text(
-                      'SSID Resolver Involved',
-                      style: TextStyle(
-                        color: const Color(0xFFFFA500),
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                      ),
+      backgroundColor: const Color(0xFF142467),
+      bottomNavigationBar: const SimulatorWarning(),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Title
+                Center(
+                  child: Text(
+                    'SSID Resolver Involved',
+                    style: TextStyle(
+                      color: const Color(0xFFFFA500),
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
+                ),
 
-                  const SizedBox(height: 22),
+                const SizedBox(height: 22),
 
-                  // SSID Result Display
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE0E0E0),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      _ssid,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Color(0xFF142467),
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                      ),
+                // SSID Result Display
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE0E0E0),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    _ssid,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Color(0xFF142467),
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
+                ),
 
-                  const SizedBox(height: 22),
+                const SizedBox(height: 22),
 
-                  // Request Permissions Button
-                  ElevatedButton(
-                    onPressed: _getSSID,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFFA500),
-                      foregroundColor: Colors.black,
-                      textStyle: const TextStyle(
-                          fontSize: 24, fontWeight: FontWeight.bold),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: const Text('Resolve SSID'),
+                // Request Permissions Button
+                ElevatedButton(
+                  onPressed: _getSSID,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFFFA500),
+                    foregroundColor: Colors.black,
+                    textStyle: const TextStyle(
+                        fontSize: 24, fontWeight: FontWeight.bold),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
-                ],
-              ),
+                  child: const Text('Resolve SSID'),
+                ),
+              ],
             ),
           ),
         ),
-
+      ),
     );
   }
 }

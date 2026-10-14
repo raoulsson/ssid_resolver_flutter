@@ -43,7 +43,8 @@ class MethodChannelSsidResolverFlutter extends SsidResolverFlutterPlatform {
     // this to decide where to send discovery traffic, and the two entry points
     // must not differ in error behaviour.
     try {
-      final result = await methodChannel.invokeMethod<List<Object?>>('fetchNetworkInterfaces');
+      final result = await methodChannel
+          .invokeMethod<List<Object?>>('fetchNetworkInterfaces');
       if (result == null) return const <NetworkInterfaceInfo>[];
       return result
           .whereType<Map<Object?, Object?>>()

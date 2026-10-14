@@ -87,20 +87,26 @@ class SSIDResolver {
   /// exception at that point tends to become a dead scan rather than a message.
   Future<List<NetworkInterfaceInfo>> fetchNetworkInterfaces() async {
     try {
-      final result = await _channel.invokeMethod<List<Object?>>('fetchNetworkInterfaces');
+      final result =
+          await _channel.invokeMethod<List<Object?>>('fetchNetworkInterfaces');
       if (result == null) {
-        _logFailure('fetchNetworkInterfaces: native side returned null, treating as no interfaces');
+        _logFailure(
+            'fetchNetworkInterfaces: native side returned null, treating as no interfaces');
         return const <NetworkInterfaceInfo>[];
       }
-      final maps = result.whereType<Map<Object?, Object?>>().toList(growable: false);
+      final maps =
+          result.whereType<Map<Object?, Object?>>().toList(growable: false);
       if (maps.length != result.length) {
         // A shape mismatch between the native payload and this Dart layer would
         // otherwise vanish into whereType and look like a quiet network.
-        _logFailure('fetchNetworkInterfaces: ${result.length - maps.length} of ${result.length} entries were not maps and were dropped');
+        _logFailure(
+            'fetchNetworkInterfaces: ${result.length - maps.length} of ${result.length} entries were not maps and were dropped');
       }
-      final interfaces = maps.map(NetworkInterfaceInfo.fromMap).toList(growable: false);
+      final interfaces =
+          maps.map(NetworkInterfaceInfo.fromMap).toList(growable: false);
       if (interfaces.isEmpty) {
-        _logFailure('fetchNetworkInterfaces: native side reported no IPv4 interfaces');
+        _logFailure(
+            'fetchNetworkInterfaces: native side reported no IPv4 interfaces');
       } else {
         for (final i in interfaces) {
           _log('interface $i usableLan=${i.isUsableLan}');
@@ -111,7 +117,8 @@ class SSIDResolver {
       _logFailure('fetchNetworkInterfaces failed: ${e.code} ${e.message}');
       return const <NetworkInterfaceInfo>[];
     } on MissingPluginException {
-      _logFailure('fetchNetworkInterfaces: plugin not registered on this platform, returning no interfaces');
+      _logFailure(
+          'fetchNetworkInterfaces: plugin not registered on this platform, returning no interfaces');
       return const <NetworkInterfaceInfo>[];
     }
   }
@@ -133,7 +140,8 @@ class SSIDResolver {
       // Every interface was filtered out. On a VPN-only or loopback-only device
       // that is correct, but it is also what a wrong filter looks like, so name
       // the rejects instead of returning a bare empty list.
-      _logFailure('broadcastAddresses: all ${interfaces.length} interfaces filtered out '
+      _logFailure(
+          'broadcastAddresses: all ${interfaces.length} interfaces filtered out '
           '(${interfaces.map((i) => '${i.name}:${i.ip}').join(', ')})');
     } else {
       _log('broadcastAddresses -> ${seen.join(', ')}');

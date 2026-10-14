@@ -7,12 +7,12 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 class MockSsidResolverFlutterPlatform
     with MockPlatformInterfaceMixin
     implements SsidResolverFlutterPlatform {
-
   @override
   Future<String?> getPlatformVersion() => Future.value('42');
 
   @override
-  Future<List<NetworkInterfaceInfo>> fetchNetworkInterfaces() => Future.value(const [
+  Future<List<NetworkInterfaceInfo>> fetchNetworkInterfaces() =>
+      Future.value(const [
         NetworkInterfaceInfo(
           name: 'en0',
           ip: '10.8.2.77',
@@ -42,7 +42,8 @@ class MockSsidResolverFlutterPlatform
 }
 
 void main() {
-  final SsidResolverFlutterPlatform initialPlatform = SsidResolverFlutterPlatform.instance;
+  final SsidResolverFlutterPlatform initialPlatform =
+      SsidResolverFlutterPlatform.instance;
 
   test('$MethodChannelSsidResolverFlutter is the default instance', () {
     expect(initialPlatform, isInstanceOf<MethodChannelSsidResolverFlutter>());
@@ -50,7 +51,8 @@ void main() {
 
   test('getPlatformVersion', () async {
     SSIDResolver ssidResolverFlutterPlugin = SSIDResolver();
-    MockSsidResolverFlutterPlatform fakePlatform = MockSsidResolverFlutterPlatform();
+    MockSsidResolverFlutterPlatform fakePlatform =
+        MockSsidResolverFlutterPlatform();
     SsidResolverFlutterPlatform.instance = fakePlatform;
 
     expect(await ssidResolverFlutterPlugin.getPlatformVersion(), '42');

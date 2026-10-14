@@ -18,7 +18,8 @@ class NetworkInterfacesExample extends StatefulWidget {
   const NetworkInterfacesExample({super.key});
 
   @override
-  State<NetworkInterfacesExample> createState() => _NetworkInterfacesExampleState();
+  State<NetworkInterfacesExample> createState() =>
+      _NetworkInterfacesExampleState();
 }
 
 /// Outcome of one address we attempted to send a UDP probe to.
@@ -110,16 +111,26 @@ class _NetworkInterfacesExampleState extends State<NetworkInterfacesExample> {
       socket = await RawDatagramSocket.bind(InternetAddress.anyIPv4, 0);
       socket.broadcastEnabled = true;
 
-      final payload = 'ssid_resolver_flutter probe ${DateTime.now().millisecondsSinceEpoch}'.codeUnits;
+      final payload =
+          'ssid_resolver_flutter probe ${DateTime.now().millisecondsSinceEpoch}'
+              .codeUnits;
 
       for (final entry in addressesToTry) {
         final address = entry.key;
         final isNaive = entry.value;
         try {
           final sent = socket.send(payload, InternetAddress(address), 7891);
-          results.add(_SendResult(address: address, naive: isNaive, ok: sent > 0, error: sent > 0 ? null : 'send() returned 0 bytes'));
+          results.add(_SendResult(
+              address: address,
+              naive: isNaive,
+              ok: sent > 0,
+              error: sent > 0 ? null : 'send() returned 0 bytes'));
         } catch (e) {
-          results.add(_SendResult(address: address, naive: isNaive, ok: false, error: e.toString()));
+          results.add(_SendResult(
+              address: address,
+              naive: isNaive,
+              ok: false,
+              error: e.toString()));
         }
         if (mounted) setState(() => _sendResults = List.of(results));
       }
@@ -129,7 +140,8 @@ class _NetworkInterfacesExampleState extends State<NetworkInterfacesExample> {
       // listen window costs nothing and occasionally shows a live reply.
       await Future<void>.delayed(const Duration(seconds: 2));
     } catch (e) {
-      results.add(_SendResult(address: '(bind)', naive: false, ok: false, error: e.toString()));
+      results.add(_SendResult(
+          address: '(bind)', naive: false, ok: false, error: e.toString()));
     } finally {
       socket?.close();
       if (mounted) {
@@ -190,15 +202,19 @@ class _NetworkInterfacesExampleState extends State<NetworkInterfacesExample> {
                     _broadcastsCard(),
                     const SizedBox(height: 16),
                     _sectionTitle('Computed vs. naive /24 guess'),
-                    ..._interfaces.where((i) => i.isUsableLan).map(_comparisonCard),
-                    if (_interfaces.where((i) => i.isUsableLan).isEmpty) _emptyNote('No usable LAN interfaces to compare.'),
+                    ..._interfaces
+                        .where((i) => i.isUsableLan)
+                        .map(_comparisonCard),
+                    if (_interfaces.where((i) => i.isUsableLan).isEmpty)
+                      _emptyNote('No usable LAN interfaces to compare.'),
                     const SizedBox(height: 16),
                     _sectionTitle('Live UDP proof'),
                     _udpProofCard(),
                     const SizedBox(height: 16),
                     _sectionTitle('All interfaces (${_interfaces.length})'),
                     ..._interfaces.map(_interfaceRow),
-                    if (_interfaces.isEmpty && _loadError == null) _emptyNote('No interfaces reported.'),
+                    if (_interfaces.isEmpty && _loadError == null)
+                      _emptyNote('No interfaces reported.'),
                     const SizedBox(height: 24),
                   ],
                 ),
@@ -211,7 +227,10 @@ class _NetworkInterfacesExampleState extends State<NetworkInterfacesExample> {
         padding: const EdgeInsets.only(top: 8, bottom: 8),
         child: Text(
           text,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF142467)),
+          style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF142467)),
         ),
       );
 
@@ -239,7 +258,8 @@ class _NetworkInterfacesExampleState extends State<NetworkInterfacesExample> {
           color: const Color(0xFFFFF3E0),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: const Text('broadcastAddresses() returned nothing -- no usable LAN interface was found.'),
+        child: const Text(
+            'broadcastAddresses() returned nothing -- no usable LAN interface was found.'),
       );
     }
     return Container(
@@ -277,15 +297,19 @@ class _NetworkInterfacesExampleState extends State<NetworkInterfacesExample> {
       decoration: BoxDecoration(
         color: differs ? const Color(0xFFFFF8E1) : const Color(0xFFF1F8E9),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: differs ? const Color(0xFFF9A825) : const Color(0xFF9CCC65)),
+        border: Border.all(
+            color: differs ? const Color(0xFFF9A825) : const Color(0xFF9CCC65)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('${iface.name}  ${iface.ip}/${iface.prefixLength}', style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text('${iface.name}  ${iface.ip}/${iface.prefixLength}',
+              style: const TextStyle(fontWeight: FontWeight.bold)),
           const SizedBox(height: 4),
-          Text('computed broadcast:  ${iface.broadcast}', style: const TextStyle(fontFamily: 'monospace')),
-          Text('naive /24 guess:     ${naive ?? '(unparseable)'}', style: const TextStyle(fontFamily: 'monospace')),
+          Text('computed broadcast:  ${iface.broadcast}',
+              style: const TextStyle(fontFamily: 'monospace')),
+          Text('naive /24 guess:     ${naive ?? '(unparseable)'}',
+              style: const TextStyle(fontFamily: 'monospace')),
           const SizedBox(height: 4),
           Text(
             differs
@@ -293,7 +317,8 @@ class _NetworkInterfacesExampleState extends State<NetworkInterfacesExample> {
                 : 'SAME -- this is a /24 network, so the naive guess happens to be correct here. Expected, not a sign the fix does nothing.',
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: differs ? const Color(0xFFE65100) : const Color(0xFF33691E),
+              color:
+                  differs ? const Color(0xFFE65100) : const Color(0xFF33691E),
             ),
           ),
         ],
@@ -350,7 +375,10 @@ class _NetworkInterfacesExampleState extends State<NetworkInterfacesExample> {
                 children: [
                   TextSpan(
                     text: '${r.address}${r.naive ? ' (naive /24)' : ''}: ',
-                    style: TextStyle(fontFamily: 'monospace', fontWeight: FontWeight.bold, color: color),
+                    style: TextStyle(
+                        fontFamily: 'monospace',
+                        fontWeight: FontWeight.bold,
+                        color: color),
                   ),
                   TextSpan(
                     text: r.ok ? 'sent OK' : (r.error ?? 'error'),
@@ -381,22 +409,31 @@ class _NetworkInterfacesExampleState extends State<NetworkInterfacesExample> {
           Row(
             children: [
               Expanded(
-                child: Text(i.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                child: Text(i.name,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16)),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(
+                    color: color, borderRadius: BorderRadius.circular(12)),
                 child: Text(
                   _classificationLabel(i),
-                  style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 4),
-          Text('ip: ${i.ip}/${i.prefixLength}', style: const TextStyle(fontFamily: 'monospace')),
-          Text('netmask: ${i.netmask}', style: const TextStyle(fontFamily: 'monospace')),
-          Text('broadcast: ${i.broadcast}', style: const TextStyle(fontFamily: 'monospace')),
+          Text('ip: ${i.ip}/${i.prefixLength}',
+              style: const TextStyle(fontFamily: 'monospace')),
+          Text('netmask: ${i.netmask}',
+              style: const TextStyle(fontFamily: 'monospace')),
+          Text('broadcast: ${i.broadcast}',
+              style: const TextStyle(fontFamily: 'monospace')),
         ],
       ),
     );

@@ -59,7 +59,8 @@ class ExampleHome extends StatelessWidget {
             _tile(
               context,
               title: 'Network Interfaces (1.5.0)',
-              subtitle: 'Hardware validation for fetchNetworkInterfaces() / broadcastAddresses()',
+              subtitle:
+                  'Hardware validation for fetchNetworkInterfaces() / broadcastAddresses()',
               builder: (_) => const NetworkInterfacesExample(),
             ),
             const SizedBox(height: 8),
@@ -97,7 +98,8 @@ class ExampleHome extends StatelessWidget {
         title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(subtitle),
         trailing: const Icon(Icons.chevron_right),
-        onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: builder)),
+        onTap: () =>
+            Navigator.of(context).push(MaterialPageRoute(builder: builder)),
       ),
     );
   }
@@ -167,9 +169,7 @@ class _SSIDExampleState extends State<SSIDExample> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 22),
-
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -186,9 +186,7 @@ class _SSIDExampleState extends State<SSIDExample> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 22),
-
                 ElevatedButton(
                   onPressed: _resolveSSID,
                   style: ElevatedButton.styleFrom(

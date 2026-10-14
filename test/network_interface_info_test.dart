@@ -13,12 +13,19 @@ Map<Object?, Object?> wire({
   String broadcast = '10.8.15.255',
   Object? prefixLength = 20,
 }) =>
-    {'name': name, 'ip': ip, 'netmask': netmask, 'broadcast': broadcast, 'prefixLength': prefixLength};
+    {
+      'name': name,
+      'ip': ip,
+      'netmask': netmask,
+      'broadcast': broadcast,
+      'prefixLength': prefixLength
+    };
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   const channel = MethodChannel('ssid_resolver_flutter');
-  final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+  final messenger =
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
 
   void mock(Object? Function(MethodCall call) handler) {
     messenger.setMockMethodCallHandler(channel, (call) async => handler(call));
@@ -51,17 +58,24 @@ void main() {
     test('accepts prefixLength arriving as a String', () {
       // Some channel codecs widen numbers; a String must not become 0 silently
       // when it carries a real value.
-      expect(NetworkInterfaceInfo.fromMap(wire(prefixLength: '24')).prefixLength, 24);
+      expect(
+          NetworkInterfaceInfo.fromMap(wire(prefixLength: '24')).prefixLength,
+          24);
     });
 
     test('falls back to 0 for an unparseable prefixLength', () {
-      expect(NetworkInterfaceInfo.fromMap(wire(prefixLength: 'twenty')).prefixLength, 0);
+      expect(
+          NetworkInterfaceInfo.fromMap(wire(prefixLength: 'twenty'))
+              .prefixLength,
+          0);
     });
 
     test('accepts prefixLength arriving as a double', () {
       // Channel codecs can widen an int to a double; 20.0 must stay 20 and
       // not fall through string parsing to 0.
-      expect(NetworkInterfaceInfo.fromMap(wire(prefixLength: 20.0)).prefixLength, 20);
+      expect(
+          NetworkInterfaceInfo.fromMap(wire(prefixLength: 20.0)).prefixLength,
+          20);
     });
 
     test('round-trips through toMap', () {
@@ -85,7 +99,8 @@ void main() {
       expect(of('en0', '169.253.10.3').isLinkLocal, isFalse);
     });
 
-    test('tunnels are excluded — broadcasting into a VPN closes iOS sockets', () {
+    test('tunnels are excluded — broadcasting into a VPN closes iOS sockets',
+        () {
       expect(of('utun4', '10.5.0.2').isTunnel, isTrue);
       expect(of('tun0', '10.5.0.2').isTunnel, isTrue);
       expect(of('ppp0', '10.5.0.2').isTunnel, isTrue);
@@ -94,7 +109,8 @@ void main() {
 
     test('ordinary interfaces are not mistaken for tunnels', () {
       for (final n in ['en0', 'en1', 'wlan0', 'eth0', 'rmnet0', 'ap1']) {
-        expect(of(n, '10.8.2.77').isTunnel, isFalse, reason: '$n must not be classified as a tunnel');
+        expect(of(n, '10.8.2.77').isTunnel, isFalse,
+            reason: '$n must not be classified as a tunnel');
       }
       // rmnet0 is not a tunnel, but it is cellular and must still be rejected:
       // on a /32 its computed broadcast is its own IP, and sending there goes
@@ -103,15 +119,26 @@ void main() {
     });
 
     test('cellular interfaces are detected', () {
-      for (final n in ['pdp_ip0', 'pdp_ip1', 'rmnet0', 'rmnet_data1', 'ccmni0', 'radio0', 'clat4']) {
-        expect(of(n, '10.55.21.9').isCellular, isTrue, reason: '$n is cellular');
-        expect(of(n, '10.55.21.9').isUsableLan, isFalse, reason: '$n must not be a usable LAN');
+      for (final n in [
+        'pdp_ip0',
+        'pdp_ip1',
+        'rmnet0',
+        'rmnet_data1',
+        'ccmni0',
+        'radio0',
+        'clat4'
+      ]) {
+        expect(of(n, '10.55.21.9').isCellular, isTrue,
+            reason: '$n is cellular');
+        expect(of(n, '10.55.21.9').isUsableLan, isFalse,
+            reason: '$n must not be a usable LAN');
       }
     });
 
     test('LAN interfaces are not mistaken for cellular', () {
       for (final n in ['en0', 'wlan0', 'eth0', 'ap1']) {
-        expect(of(n, '10.8.2.77').isCellular, isFalse, reason: '$n must not be classified as cellular');
+        expect(of(n, '10.8.2.77').isCellular, isFalse,
+            reason: '$n must not be classified as cellular');
       }
     });
 
@@ -126,7 +153,8 @@ void main() {
 
   group('fetchNetworkInterfaces', () {
     test('maps a native list', () async {
-      mock((_) => [wire(), wire(name: 'lo0', ip: '127.0.0.1', prefixLength: 8)]);
+      mock(
+          (_) => [wire(), wire(name: 'lo0', ip: '127.0.0.1', prefixLength: 8)]);
       final r = await SSIDResolver().fetchNetworkInterfaces();
       expect(r, hasLength(2));
       expect(r.first.broadcast, '10.8.15.255');
@@ -175,9 +203,21 @@ void main() {
     test('keeps only real LAN interfaces', () async {
       mock((_) => [
             wire(),
-            wire(name: 'lo0', ip: '127.0.0.1', broadcast: '127.255.255.255', prefixLength: 8),
-            wire(name: 'utun4', ip: '10.5.0.2', broadcast: '10.5.255.255', prefixLength: 16),
-            wire(name: 'en1', ip: '169.254.3.3', broadcast: '169.254.255.255', prefixLength: 16),
+            wire(
+                name: 'lo0',
+                ip: '127.0.0.1',
+                broadcast: '127.255.255.255',
+                prefixLength: 8),
+            wire(
+                name: 'utun4',
+                ip: '10.5.0.2',
+                broadcast: '10.5.255.255',
+                prefixLength: 16),
+            wire(
+                name: 'en1',
+                ip: '169.254.3.3',
+                broadcast: '169.254.255.255',
+                prefixLength: 16),
           ]);
       expect(await SSIDResolver().broadcastAddresses(), ['10.8.15.255']);
     });
@@ -204,18 +244,22 @@ void main() {
   group('method channel layer', () {
     test('MethodChannelSsidResolverFlutter maps entries', () async {
       mock((_) => [wire()]);
-      final r = await MethodChannelSsidResolverFlutter().fetchNetworkInterfaces();
+      final r =
+          await MethodChannelSsidResolverFlutter().fetchNetworkInterfaces();
       expect(r.single.prefixLength, 20);
     });
 
-    test('honours the empty-list-never-throw contract on a PlatformException', () async {
+    test('honours the empty-list-never-throw contract on a PlatformException',
+        () async {
       mock((_) => throw PlatformException(code: 'BOOM'));
-      expect(await MethodChannelSsidResolverFlutter().fetchNetworkInterfaces(), isEmpty);
+      expect(await MethodChannelSsidResolverFlutter().fetchNetworkInterfaces(),
+          isEmpty);
     });
 
     test('honours the contract when the plugin is missing', () async {
       messenger.setMockMethodCallHandler(channel, null);
-      expect(await MethodChannelSsidResolverFlutter().fetchNetworkInterfaces(), isEmpty);
+      expect(await MethodChannelSsidResolverFlutter().fetchNetworkInterfaces(),
+          isEmpty);
     });
   });
 }
