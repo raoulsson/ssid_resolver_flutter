@@ -1,6 +1,7 @@
 ## 1.5.2
 
 * iOS now supports Swift Package Manager: sources moved to `ios/ssid_resolver_flutter/Sources/ssid_resolver_flutter/` and a `Package.swift` was added. CocoaPods still works. No API change.
+* Code formatted with `dart format`.
 
 ## 1.5.1
 
