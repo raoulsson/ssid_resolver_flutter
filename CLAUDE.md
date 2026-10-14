@@ -58,7 +58,7 @@ Four methods cross the platform boundary:
 | `requestPermission` | Same Map structure as above |
 | `fetchSsid` | `String` (SSID name or "Unknown") |
 
-### iOS Native (`ios/Classes/`)
+### iOS Native (`ios/ssid_resolver_flutter/Sources/ssid_resolver_flutter/`)
 
 - **`SsidResolverFlutterPlugin.swift`** — Plugin entry point, routes method channel calls
 - **`CoreSSIDResolver.swift`** — Uses `CoreLocation` (CLLocationManager) + `NetworkExtension` (NEHotspotNetwork) to resolve SSID
