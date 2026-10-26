@@ -1,3 +1,7 @@
+## 1.5.3
+
+* iOS: `PrivacyInfo.xcprivacy` is now shipped as a resource bundle (`ssid_resolver_flutter_privacy`) for CocoaPods and as a processed resource for Swift Package Manager. Before, the podspec's `**/*` source glob handed it to the compiler, which Xcode reported as "no rule to process file ... PrivacyInfo.xcprivacy of type 'text.xml'", and the manifest never reached the app. No code or API change.
+
 ## 1.5.2
 
 * iOS now supports Swift Package Manager: sources moved to `ios/ssid_resolver_flutter/Sources/ssid_resolver_flutter/` and a `Package.swift` was added. CocoaPods still works. No API change.
